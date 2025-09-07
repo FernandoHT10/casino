@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎡 Ruleta Mejorada 🎡</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d1f0d, #0a2f0a, #051905);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(25, 100, 25, 0.15), transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(15, 70, 15, 0.15), transparent 30%),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%230b3b0b' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        h2 { 
+            text-align: center; 
+            font-size: 3.5rem; 
+            margin-bottom: 25px; 
+            color: #ffd700; 
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 3px 3px 7px rgba(0,0,0,0.7);
+            animation: titleGlow 3s infinite alternate;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 15px rgba(255, 215, 0, 0.7), 3px 3px 7px rgba(0,0,0,0.7); }
+            to { text-shadow: 0 0 25px rgba(255, 215, 0, 0.9), 0 0 35px rgba(255, 215, 0, 0.6), 3px 3px 7px rgba(0,0,0,0.7); }
+        }
+        .game-header { 
+            text-align: center; 
+            margin-bottom: 25px; 
+        }
+        .balance { 
+            font-size: 1.7rem; 
+            background: rgba(0,0,0,0.4); 
+            padding: 18px 30px; 
+            border-radius: 15px; 
+            display: inline-block; 
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        .balance::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,215,0,0), rgba(255,215,0,0.15), rgba(255,215,0,0));
+            transform: rotate(30deg);
+            animation: balanceShine 4s infinite;
+        }
+        @keyframes balanceShine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .roulette-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            align-items: flex-start;
+        }
+        
+        /* Estilos para la nueva ruleta SVG */
+        :root {
+          --size: 450px;
+          --vw: 500; /* viewbox base used in calculations */
+        }
+        
+        .wheel-wrapper{
+          width: var(--size);
+          height: var(--size);
+          margin: 0 auto;
+          position: relative;
+          display: inline-block;
+          border-radius: 50%;
+          box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+        }
+
+        svg#wheel{
+          width: 100%;
+          height: 100%;
+          display: block;
+          transform-origin: 50% 50%;
+          transform-box: fill-box; /* importante para rotar correctamente */
+          border-radius: 50%;
+          background: radial-gradient(circle at 50% 55%, rgba(255,255,255,0.02), rgba(0,0,0,0.25));
+        }
+
+        /* Puntero fijo en la parte superior */
+        .pointer {
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 30;
+          width: 0;
+          height: 0;
+          border-left: 14px solid transparent;
+          border-right: 14px solid transparent;
+          border-bottom: 22px solid #ffd700;
+          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        /* Pelota (mejor renderizada) */
+        #ball {
+          position: absolute;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          z-index: 40;
+          pointer-events: none;
+          /* brillo y volúmen */
+          background: radial-gradient(circle at 30% 30%, #fff 0%, #f0f0f0 35%, #cfcfcf 60%, #a8a8a8 100%);
+          box-shadow:
+            0 6px 10px rgba(0,0,0,0.6),
+            inset -3px -3px 6px rgba(0,0,0,0.25),
+            0 0 16px rgba(255,255,255,0.08);
+          transform: translate(-50%,-50%);
+        }
+
+        /* animación ligera mientras gira */
+        .ball.spinPulse {
+          animation: spinPulse 0.9s linear infinite;
+        }
+        @keyframes spinPulse {
+          0% { transform: translate(-50%,-50%) translateY(0) scale(1); }
+          50%{ transform: translate(-50%,-50%) translateY(-4px) scale(1.03); }
+          100%{ transform: translate(-50%,-50%) translateY(0) scale(1); }
+        }
+
+        /* highlight sector ganador */
+        .sector-winner {
+          filter: drop-shadow(0 6px 12px rgba(255,215,0,0.35));
+          stroke-width: 3 !important;
+          transition: all .5s ease;
+        }
+
+        /* controles */
+        .controls { margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+        button {
+          background:#112;
+          color:#fff;
+          border: 2px solid rgba(255,215,0,0.12);
+          padding:10px 16px;
+          border-radius:10px;
+          cursor:pointer;
+          font-weight:600;
+        }
+        button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+        .spin { background: linear-gradient(180deg,#1bb76b,#0e8a4d); border-color: rgba(0,0,0,0.2); box-shadow: 0 6px 12px rgba(0,0,0,0.5); }
+        .menu { background: linear-gradient(180deg,#2b71d6,#1458b0); border-color: rgba(0,0,0,0.2); }
+
+        #result { margin-top:14px; font-size:18px; min-height:28px; color:#ffeaa7; text-shadow:0 3px 12px rgba(0,0,0,0.6); }
+
+        /* núm. dentro del sector (SVG text) */
+        .wheel-number { font: bold 13px/1 "Arial Black", Arial, sans-serif; fill: #ffffff; paint-order: stroke; stroke: rgba(0,0,0,0.6); stroke-width: 1px; }
+
+        @media (max-width:560px){
+          :root{ --size: 380px; --vw: 380; }
+          .pointer { border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 18px solid #ffd700; }
+        }
+        
+        .betting-section { 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 20px; 
+            padding: 30px; 
+            border: 3px solid rgba(255, 215, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            max-width: 500px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .betting-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #ffd700, transparent);
+            animation: sectionGlow 3s infinite;
+        }
+        @keyframes sectionGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .bet-input-container { 
+            text-align: center; 
+            margin-bottom: 25px; 
+        }
+        input[type="number"] { 
+            padding: 18px; 
+            font-size: 20px; 
+            border-radius: 12px; 
+            border: 3px solid #ffd700;
+            text-align: center; 
+            width: 100%;
+            max-width: 300px;
+            background: rgba(0,0,0,0.4);
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .bet-type-title {
+            text-align: center; 
+            margin: 25px 0 20px; 
+            color: #ffd700; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            font-size: 1.5rem;
+            position: relative;
+            display: inline-block;
+            padding: 0 15px;
+        }
+        .bet-type-title::before, .bet-type-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ffd700, transparent);
+        }
+        .bet-type-title::before {
+            right: 100%;
+        }
+        .bet-type-title::after {
+            left: 100%;
+        }
+        
+        .bet-options { 
+            display: flex; 
+            justify-content: center; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            margin-bottom: 30px;
+        }
+        .bet-btn {
+            padding: 20px 35px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 15px;
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #fff;
+            transition: all 0.3s ease; 
+            border-bottom: 6px solid;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            min-width: 140px;
+        }
+        .bet-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+        .bet-btn:hover:not(:disabled) { 
+            transform: translateY(-6px); 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+        }
+        .bet-btn:hover::before {
+            left: 100%;
+        }
+        .bet-btn.red { 
+            background: linear-gradient(145deg, #c0392b, #e74c3c); 
+            border-color: #922b21; 
+        }
+        .bet-btn.black { 
+            background: linear-gradient(145deg, #2c3e50, #34495e); 
+            border-color: #1c2833; 
+        }
+        .bet-btn.green { 
+            background: linear-gradient(145deg, #27ae60, #2ecc71); 
+            border-color: #1e8449; 
+        }
+        .bet-btn:disabled { 
+            background: #555; 
+            cursor: not-allowed; 
+            opacity: 0.6; 
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 8px; 
+            margin: 20px auto;
+        }
+        .number-btn {
+            aspect-ratio: 1; 
+            border-radius: 10px;
+            background: rgba(0,0,0,0.4); 
+            color: #fff;
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border: 3px solid;
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Arial Black', Arial, sans-serif;
+        }
+        .number-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.15);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .number-btn:hover:not(:disabled) { 
+            transform: scale(1.1); 
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
+        }
+        .number-btn:hover::after {
+            opacity: 1;
+        }
+        .number-btn.red { 
+            border-color: #c0392b; 
+            color: #ff4757; 
+        }
+        .number-btn.black { 
+            border-color: #2c3e50; 
+            color: #bdc3c7; 
+        }
+        .number-btn.green { 
+            border-color: #27ae60; 
+            color: #2ed573; 
+        }
+        .number-btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+
+        #resultDisplay {
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: bold;
+            margin-top: 30px; 
+            padding: 25px; 
+            border-radius: 15px;
+            display: none; 
+            animation: resultZoom 0.5s ease-out;
+            background: rgba(0,0,0,0.4);
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        @keyframes resultZoom { 
+            from { transform: scale(0.5); opacity: 0; } 
+            to { transform: scale(1); opacity: 1; } 
+        }
+        #resultDisplay.win { 
+            border-color: #2ed573;
+            color: #2ed573; 
+            box-shadow: 0 0 25px rgba(46, 213, 115, 0.5);
+            background: linear-gradient(45deg, rgba(46, 213, 115, 0.15), rgba(46, 213, 115, 0.25));
+        }
+        #resultDisplay.lose { 
+            border-color: #ff4757;
+            color: #ff4757; 
+            box-shadow: 0 0 25px rgba(255, 71, 87, 0.5);
+            background: linear-gradient(45deg, rgba(255, 71, 87, 0.15), rgba(255, 71, 87, 0.25));
+        }
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: #ffd700;
+            opacity: 0;
+            z-index: 100;
+            border-radius: 0;
+        }
+
+        .back-button {
+            display: block;
+            width: fit-content;
+            margin: 40px auto;
+            padding: 15px 30px;
+            background: linear-gradient(145deg, #333, #555);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 3px solid #ffd700;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.4), transparent);
+            transition: 0.5s;
+        }
+        .back-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .back-button:hover::before {
+            left: 100%;
+        }
+
+        /* Efectos de carga */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255,215,0,0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s infinite ease;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Efecto de luz direccional */
+        .light-effect {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,215,0,0.2), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.5;
+            animation: lightMove 15s infinite alternate;
+        }
+        @keyframes lightMove {
+            0% { transform: translate(10%, 10%); }
+            100% { transform: translate(80%, 80%); }
+        }
+        
+        /* Historial de resultados */
+        .history-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 2px solid rgba(255,215,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+        .history-title {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .history-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .history-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .history-red {
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            color: white;
+        }
+        .history-black {
+            background: linear-gradient(to bottom, #2c3e50, #34495e);
+            color: white;
+        }
+        .history-green {
+            background: linear-gradient(to bottom, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        @media (max-width: 1100px) {
+            .roulette-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .betting-section {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            :root { --size: 380px; }
+            .bet-btn {
+                padding: 15px 25px;
+                font-size: 18px;
+            }
+            .number-btn {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="light-effect" style="top: 10%; left: 10%;"></div>
+    <div class="light-effect" style="top: 60%; left: 60%; animation-delay: -7s;"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <h2>🎡 Ruleta Mejorada 🎡</h2>
+        <div class="game-header">
+            <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+        </div>
+
+        <div class="roulette-section">
+            <div class="roulette-container">
+                <div class="wheel-wrapper" id="wheelWrapper">
+                    <div class="pointer" id="pointer"></div>
+                    <div id="ball"></div>
+                    <svg id="wheel" viewBox="0 0 500 500" aria-hidden="true"></svg>
+                </div>
+            </div>
+
+            <div class="betting-section">
+                <div class="bet-input-container">
+                    <input type="number" id="apuesta" placeholder="💰 Ingresa tu apuesta" min="1">
+                </div>
+                <div style="text-align: center;">
+                    <h3 class="bet-type-title">🎨 Apostar por Color</h3>
+                </div>
+                <div class="bet-options">
+                    <button class="bet-btn red" data-bet-type="color" data-value="rojo">Rojo (2x)</button>
+                    <button class="bet-btn black" data-bet-type="color" data-value="negro">Negro (2x)</button>
+                    <button class="bet-btn green" data-bet-type="color" data-value="verde">Verde (14x)</button>
+                </div>
+                <div style="text-align: center;">
+                    <h3 class="bet-type-title">🔢 Apostar por Número (35x)</h3>
+                </div>
+                <div class="number-grid" id="numberGrid"></div>
+            </div>
+        </div>
+
+        <div id="resultDisplay"></div>
+        
+        <div class="history-container">
+            <div class="history-title">Últimos resultados</div>
+            <div class="history-numbers" id="historyNumbers">
+                <!-- Los resultados se agregarán aquí dinámicamente -->
+            </div>
+        </div>
+        
+        <a href="../index.html" class="back-button">🏠 Volver al Menú</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+            let currentUser = localStorage.getItem("currentUser");
+            let saldoEl = document.getElementById("saldo");
+            const apuestaInput = document.getElementById("apuesta");
+            const resultDisplay = document.getElementById("resultDisplay");
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const historyNumbers = document.getElementById('historyNumbers');
+            
+            // Historial de resultados
+            let resultsHistory = JSON.parse(localStorage.getItem('rouletteHistory')) || [];
+
+            let isSpinning = false;
+            
+            const americanOrder = [0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1, -1, 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2];
+            const numberColors = {
+                red: [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
+                black: [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
+                green: [0, -1]
+            };
+
+            // Variables para la ruleta SVG
+            const svg = document.getElementById('wheel');
+            const wrapper = document.getElementById('wheelWrapper');
+            const pointer = document.getElementById('pointer');
+            const ball = document.getElementById('ball');
+            
+            // Orden americano (38 casillas, "00" representado como "00")
+            const numbers = [
+                "0","28","9","26","30","11","7","20","32","17","5","22","34","15","3","24",
+                "36","13","1","00","27","10","25","29","12","8","19","31","18","6","21",
+                "33","16","4","23","35","14","2"
+            ];
+
+            function getColor(num){
+                if(num==="0" || num==="00") return "#0b8b3b"; // verde
+                const reds = new Set(["1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"]);
+                return reds.has(num) ? "#d01f2a" : "#111827"; // rojo / negro
+            }
+
+            const VIEWBOX = 500;         // usado al dibujar
+            const CENTER = VIEWBOX/2;    // 250
+            const RADIUS = 200;          // radio del anillo
+
+            const angleStep = 360 / numbers.length; // ~9.4737 grados por sector
+
+            // para rotaciones acumuladas (evita que la ruleta "salte" en giros consecutivos)
+            let currentRotation = 0;
+
+            // Dibujar sectores y textos (paths y text) en SVG
+            const sectorPaths = []; // guardamos las referencias
+            numbers.forEach((num, i) => {
+                const startAngle = i * angleStep;
+                const endAngle = startAngle + angleStep;
+
+                // coordenadas en el viewbox (usar el mismo centro/radio definido arriba)
+                const x1 = CENTER + RADIUS * Math.cos(startAngle * Math.PI/180);
+                const y1 = CENTER + RADIUS * Math.sin(startAngle * Math.PI/180);
+                const x2 = CENTER + RADIUS * Math.cos(endAngle * Math.PI/180);
+                const y2 = CENTER + RADIUS * Math.sin(endAngle * Math.PI/180);
+
+                const d = `M ${CENTER},${CENTER} L ${x1},${y1} A ${RADIUS},${RADIUS} 0 0,1 ${x2},${y2} Z`;
+                const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+                path.setAttribute("d", d);
+                path.setAttribute("fill", getColor(num));
+                path.setAttribute("stroke", "rgba(0,0,0,0.45)");
+                path.setAttribute("stroke-width", "1");
+                path.dataset.index = i;
+                svg.appendChild(path);
+                sectorPaths.push(path);
+
+                // texto del número, ubicado cerca del borde (210 px desde el centro)
+                const textAngle = startAngle + angleStep/2;
+                const tx = CENTER + (RADIUS - 30) * Math.cos(textAngle * Math.PI/180);
+                const ty = CENTER + (RADIUS - 30) * Math.sin(textAngle * Math.PI/180);
+                const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+                text.setAttribute("x", tx);
+                text.setAttribute("y", ty);
+                text.setAttribute("class", "wheel-number");
+                text.setAttribute("text-anchor","middle");
+                text.setAttribute("alignment-baseline","middle");
+                // rotar el texto para que quede legible alrededor del borde
+                text.setAttribute("transform", `rotate(${textAngle + 90}, ${tx}, ${ty})`);
+                text.textContent = num;
+                svg.appendChild(text);
+            });
+
+            // posiciona puntero y pelota (en coordenadas del wrapper)
+            function positionPointerAndBall(){
+                // Consideramos la ruleta dibujada con viewBox 500x500. El wrapper tiene ancho wPx.
+                const wRect = wrapper.getBoundingClientRect();
+                // Escala del SVG: si cambia el tamaño real del wrapper respecto al viewBox
+                const scale = wRect.width / VIEWBOX;
+                const centerPx = { x: wRect.width/2, y: wRect.height/2 };
+                // radio en px relativo al wrapper actual
+                const radiusPx = RADIUS * scale;
+                const pointerAngleDeg = -90; // arriba (12:00)
+                const rad = pointerAngleDeg * Math.PI/180;
+                const px = centerPx.x + radiusPx * Math.cos(rad);
+                const py = centerPx.y + radiusPx * Math.sin(rad);
+
+                // posicionamos pointer justo encima del borde
+                pointer.style.left = `${centerPx.x}px`;
+                pointer.style.top  = `${centerPx.y - radiusPx - 10}px`; // 10px por fuera
+
+                // posicionamos la bola sobre el puntero (ligeramente dentro del borde)
+                const ballRadiusOffset = 12; // para que la bola quede un poco hacia dentro
+                const ballX = centerPx.x + (radiusPx - ballRadiusOffset) * Math.cos(rad);
+                const ballY = centerPx.y + (radiusPx - ballRadiusOffset) * Math.sin(rad);
+
+                ball.style.left = `${ballX}px`;
+                ball.style.top  = `${ballY}px`;
+            }
+
+            // Siempre (re)posicionar al cargar y al redimensionar
+            window.addEventListener('resize', positionPointerAndBall);
+            window.addEventListener('load', positionPointerAndBall);
+            positionPointerAndBall();
+
+            // función spin (sincronizada)
+            function spinWheel(winningIndex){
+                return new Promise((resolve) => {
+                    if(isSpinning) return;
+                    isSpinning = true;
+                    resultDisplay.textContent = '';
+                    // quitar highlight previo
+                    sectorPaths.forEach(p => p.classList.remove('sector-winner'));
+
+                    const winningNumber = numbers[winningIndex];
+
+                    // cálculo de ángulos
+                    const sectorCenterAngle = winningIndex * angleStep + angleStep/2; // en grados
+                    const pointerAngle = -90; // queremos que el centro del sector acabe en -90 (arriba)
+
+                    // normalizaciones para trabajar con 0..359
+                    const norm = d => ((d % 360) + 360) % 360;
+                    const baseTarget = norm(pointerAngle - sectorCenterAngle); // ángulo objetivo mod 360
+
+                    // rotación actual módulo 360
+                    const currentMod = norm(currentRotation);
+
+                    // delta mínimo (0..359) que llevaría currentMod a baseTarget si le sumamos delta
+                    let delta = norm(baseTarget - currentMod);
+
+                    // añadimos giros completos aleatorios para mejorar el efecto (y que sea siempre hacia adelante)
+                    const extraSpins = 6 + Math.floor(Math.random() * 5); // 6..10 giros completos
+                    const rotationDelta = extraSpins * 360 + delta;
+
+                    // actualizamos rotación total y animamos
+                    currentRotation += rotationDelta;
+
+                    // animación visual de la bola (pequeña pulsación mientras gira)
+                    ball.classList.add('spinPulse');
+
+                    // animar rueda: duracion 6s (coherente con lo anterior)
+                    const duration = 6000;
+                    svg.style.transition = `transform ${duration}ms cubic-bezier(0.15,0.8,0.25,1)`;
+                    svg.style.transform = `rotate(${currentRotation}deg)`;
+
+                    // fallback por si no llega transitionend
+                    let finished = false;
+                    function finishSpin(){
+                        if(finished) return;
+                        finished = true;
+                        isSpinning = false;
+                        ball.classList.remove('spinPulse');
+
+                        // resaltar sector ganador (buscamos la path por dataset.index)
+                        const winnerPath = sectorPaths[winningIndex];
+                        if(winnerPath){
+                            winnerPath.classList.add('sector-winner');
+                            // efecto pequeño de "pulse" en la sección ganadora
+                            setTimeout(()=> winnerPath.classList.remove('sector-winner'), 3000);
+                        }
+
+                        resolve(winningNumber);
+                    }
+
+                    // Usar evento transitionend del svg para finalizar (si viene)
+                    const onTransEnd = (ev) => {
+                        if(ev.target === svg && (ev.propertyName === 'transform' || ev.propertyName === 'transform')) {
+                            svg.removeEventListener('transitionend', onTransEnd);
+                            // pequeña pausa para que el usuario vea el final
+                            setTimeout(finishSpin, 60);
+                        }
+                    };
+                    svg.addEventListener('transitionend', onTransEnd);
+
+                    // seguridad: fallback timeout (en caso de que transitionend no se dispare)
+                    setTimeout(() => {
+                        if(!finished) finishSpin();
+                    }, duration + 120);
+                });
+            }
+
+            function updateSaldo() {
+                if(users[currentUser]) {
+                    saldoEl.innerText = Math.floor(users[currentUser].saldo).toLocaleString();
+                }
+            }
+            
+            function updateHistory() {
+                historyNumbers.innerHTML = '';
+                // Mostrar solo los últimos 10 resultados
+                const recentResults = resultsHistory.slice(-10);
+                
+                recentResults.forEach(result => {
+                    const historyEl = document.createElement('div');
+                    historyEl.classList.add('history-number');
+                    
+                    let colorClass = '';
+                    if (numberColors.red.includes(result)) {
+                        colorClass = 'history-red';
+                    } else if (numberColors.black.includes(result)) {
+                        colorClass = 'history-black';
+                    } else {
+                        colorClass = 'history-green';
+                    }
+                    
+                    historyEl.classList.add(colorClass);
+                    historyEl.textContent = result === -1 ? '00' : result;
+                    historyNumbers.appendChild(historyEl);
+                });
+            }
+
+            function createNumberGrid() {
+                const grid = document.getElementById('numberGrid');
+                
+                // Crear botones para 0 y 00 primero
+                [0, -1].forEach(num => {
+                    const btn = document.createElement('button');
+                    btn.classList.add('number-btn', 'green');
+                    btn.textContent = num === -1 ? '00' : num;
+                    btn.dataset.betType = 'number';
+                    btn.dataset.value = num;
+                    grid.appendChild(btn);
+                });
+                
+                // Crear botones para los números 1-36
+                for (let num = 1; num <= 36; num++) {
+                    const btn = document.createElement('button');
+                    btn.classList.add('number-btn');
+                    btn.textContent = num;
+                    btn.dataset.betType = 'number';
+                    btn.dataset.value = num;
+
+                    if (numberColors.red.includes(num)) {
+                        btn.classList.add('red');
+                    } else if (numberColors.black.includes(num)) {
+                        btn.classList.add('black');
+                    } else {
+                        btn.classList.add('green');
+                    }
+                    
+                    grid.appendChild(btn);
+                }
+            }
+
+            function createConfetti() {
+                for (let i = 0; i < 70; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = `${Math.random() * 100}%`;
+                    confetti.style.background = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                    confetti.style.width = `${6 + Math.random() * 6}px`;
+                    confetti.style.height = `${6 + Math.random() * 6}px`;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    document.body.appendChild(confetti);
+                    
+                    // Animar confeti
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 150 + Math.random() * 250;
+                    const duration = 1.5 + Math.random() * 2;
+                    
+                    setTimeout(() => {
+                        confetti.style.transition = `all ${duration}s ease-out`;
+                        confetti.style.opacity = '1';
+                        confetti.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(${Math.random() * 1080}deg)`;
+                        
+                        setTimeout(() => {
+                            confetti.style.opacity = '0';
+                            setTimeout(() => {
+                                document.body.removeChild(confetti);
+                            }, 2000);
+                        }, duration * 900);
+                    }, i * 40);
+                }
+            }
+
+            async function spin(betType, betValue, apuesta) {
+                if (isSpinning) return;
+                
+                if (!apuesta || apuesta <= 0 || apuesta > users[currentUser].saldo) { 
+                    resultDisplay.textContent = "Apuesta inválida";
+                    resultDisplay.className = "lose";
+                    resultDisplay.style.display = 'block';
+                    return; 
+                }
+                
+                isSpinning = true;
+                toggleControls(true);
+                resultDisplay.style.display = 'none';
+                loadingOverlay.classList.add('active');
+
+                users[currentUser].saldo -= apuesta;
+                localStorage.setItem("users", JSON.stringify(users));
+                updateSaldo();
+
+                // Elegir número ganador
+                const randomIndex = Math.floor(Math.random() * americanOrder.length);
+                const winningNumber = americanOrder[randomIndex];
+                
+                // Convertir el índice a formato de la ruleta SVG
+                const svgWinningIndex = numbers.indexOf(winningNumber === -1 ? "00" : winningNumber.toString());
+                
+                // Girar la ruleta SVG
+                const result = await spinWheel(svgWinningIndex);
+                
+                calculateWinnings(winningNumber, betType, betValue, apuesta);
+                
+                isSpinning = false;
+                toggleControls(false);
+                loadingOverlay.classList.remove('active');
+            }
+
+            function calculateWinnings(winningNumber, betType, betValue, apuesta) {
+                let payout = 0;
+                let win = false;
+                
+                if (betType === 'number') {
+                    if (parseInt(betValue) === winningNumber) {
+                        payout = apuesta * 35;
+                        win = true;
+                    }
+                } else if (betType === 'color') {
+                    let winningColor = '';
+                    if (numberColors.red.includes(winningNumber)) winningColor = 'rojo';
+                    else if (numberColors.black.includes(winningNumber)) winningColor = 'negro';
+                    else winningColor = 'verde';
+
+                    if (betValue === winningColor) {
+                        const multiplier = betValue === 'verde' ? 14 : 2;
+                        payout = apuesta * multiplier;
+                        win = true;
+                    }
+                }
+
+                const winNumText = winningNumber === -1 ? '00' : winningNumber;
+                
+                // Guardar en el historial
+                resultsHistory.push(winningNumber);
+                localStorage.setItem('rouletteHistory', JSON.stringify(resultsHistory));
+                updateHistory();
+                
+                if (win) {
+                    users[currentUser].saldo += payout;
+                    resultDisplay.textContent = `¡Ganaste ${payout.toLocaleString()} créditos! El número fue ${winNumText}.`;
+                    resultDisplay.className = 'win';
+                    createConfetti();
+                } else {
+                    resultDisplay.textContent = `Perdiste. El número fue ${winNumText}.`;
+                    resultDisplay.className = 'lose';
+                }
+                resultDisplay.style.display = 'block';
+
+                localStorage.setItem("users", JSON.stringify(users));
+                updateSaldo();
+            }
+
+            function toggleControls(disable) {
+                document.querySelectorAll('.bet-btn, .number-btn').forEach(btn => btn.disabled = disable);
+                apuestaInput.disabled = disable;
+            }
+
+            // Inicialización
+            updateSaldo();
+            createNumberGrid();
+            updateHistory();
+            
+            // Event listeners para los botones de apuesta
+            document.querySelectorAll(".bet-btn, .number-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    const target = e.currentTarget;
+                    spin(target.dataset.betType, target.dataset.value, parseInt(apuestaInput.value));
+                });
+            });
+
+            // Event listener para el campo de apuesta (tecla Enter)
+            apuestaInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const firstBetBtn = document.querySelector('.bet-btn');
+                    if (firstBetBtn) {
+                        firstBetBtn.focus();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

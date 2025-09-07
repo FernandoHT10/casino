@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🥤 Thimbles Magic 🥤</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(circle at center, #2c1810, #3d2317, #1a0f08);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Partículas mágicas de fondo */
+        .magic-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .magic-particle {
+            position: absolute;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: magicFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes magicFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            25% { transform: translateY(-30px) rotate(90deg); opacity: 0.8; }
+            50% { transform: translateY(-10px) rotate(180deg); opacity: 0.5; }
+            75% { transform: translateY(-40px) rotate(270deg); opacity: 0.9; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b35, #ffa502, #ff9ff3, #ff6b35);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: magicGlow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 165, 2, 0.6));
+        }
+
+        @keyframes magicGlow {
+            0%, 100% { 
+                background-position: 0% 50%; 
+                transform: scale(1);
+            }
+            50% { 
+                background-position: 100% 50%; 
+                transform: scale(1.05);
+            }
+        }
+
+        .game-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(255, 165, 2, 0.3);
+            text-align: center;
+            animation: slideDown 0.8s ease-out;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .balance {
+            font-size: 1.8rem;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .bet-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        input[type="number"] {
+            padding: 18px 25px;
+            font-size: 20px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            width: 250px;
+            text-align: center;
+            transition: all 0.4s ease;
+            font-weight: bold;
+        }
+
+        input[type="number"]:focus {
+            transform: scale(1.08);
+            box-shadow: 0 0 25px rgba(255, 165, 2, 0.6);
+            outline: none;
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .start-btn {
+            padding: 18px 35px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(45deg, #ff6b35, #ffa502);
+            color: white;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.5);
+        }
+
+        .start-btn:hover::before {
+            left: 100%;
+        }
+
+        .game-instructions {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 165, 2, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 165, 2, 0.3);
+        }
+
+        .instructions-text {
+            font-size: 1.2rem;
+            color: #ffa502;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .instructions-detail {
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .thimbles-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 25px;
+            padding: 50px 30px;
+            margin: 40px 0;
+            border: 2px solid rgba(255, 165, 2, 0.4);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .shuffle-animation {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #ffa502;
+            margin-bottom: 30px;
+            display: none;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        #thimbles {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            perspective: 1000px;
+        }
+
+        .cup {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(145deg, #8b4513, #cd853f);
+            border-radius: 60px 60px 20px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #fff;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            border: 4px solid #daa520;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.3),
+                inset 0 5px 10px rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cup::before {
+            content: '🥤';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        .cup:hover {
+            transform: translateY(-15px) rotateX(10deg);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(255, 165, 2, 0.5);
+            border-color: #ffa502;
+        }
+
+        .cup.shuffling {
+            animation: shuffle 0.8s ease-in-out infinite;
+        }
+
+        @keyframes shuffle {
+            0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+            25% { transform: translateY(-20px) rotateZ(-10deg); }
+            50% { transform: translateY(-10px) rotateZ(5deg); }
+            75% { transform: translateY(-25px) rotateZ(10deg); }
+        }
+
+        .cup.correct {
+            background: linear-gradient(145deg, #2ed573, #20bf6b);
+            border-color: #2ed573;
+            animation: winReveal 1s ease-out;
+            box-shadow: 
+                0 0 40px rgba(46, 213, 115, 0.8),
+                0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cup.correct::before {
+            content: '🏆';
+            animation: winBounce 0.8s ease-out;
+        }
+
+        @keyframes winReveal {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3) rotateY(180deg); }
+            100% { transform: scale(1.1); }
+        }
+
+        @keyframes winBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, -50%) scale(1); }
+            40% { transform: translate(-50%, -50%) scale(1.3); }
+            60% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .cup.wrong {
+            background: linear-gradient(145deg, #ff4757, #c44569);
+            border-color: #ff4757;
+            animation: loseShake 0.8s ease-out;
+            box-shadow: 
+                0 0 40px rgba(255, 71, 87, 0.8),
+                0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cup.wrong::before {
+            content: '💥';
+            animation: explodeEffect 0.8s ease-out;
+        }
+
+        @keyframes loseShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes explodeEffect {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .ball-indicator {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffd700, #ff6b35);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            animation: ballGlow 1.5s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes ballGlow {
+            0%, 100% { 
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+                transform: translateX(-50%) scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+                transform: translateX(-50%) scale(1.1);
+            }
+        }
+
+        .result-display {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: 20px;
+            display: none;
+            animation: resultZoom 0.8s ease-out;
+        }
+
+        @keyframes resultZoom {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-display.win {
+            background: linear-gradient(45deg, rgba(46, 213, 115, 0.3), rgba(32, 191, 107, 0.3));
+            color: #2ed573;
+            border: 3px solid #2ed573;
+            box-shadow: 0 0 30px rgba(46, 213, 115, 0.5);
+        }
+
+        .result-display.lose {
+            background: linear-gradient(45deg, rgba(255, 71, 87, 0.3), rgba(196, 69, 105, 0.3));
+            color: #ff4757;
+            border: 3px solid #ff4757;
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.5);
+        }
+
+        .back-btn {
+            display: block;
+            margin: 40px auto;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(108, 117, 125, 0.4);
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 165, 2, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+            margin: 5px;
+            border: 1px solid rgba(255, 165, 2, 0.3);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffa502;
+        }
+
+        @media (max-width: 768px) {
+            h2 { font-size: 2.5rem; }
+            #thimbles { gap: 20px; flex-wrap: wrap; }
+            .cup { width: 100px; height: 100px; font-size: 2rem; }
+            .bet-section { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="magic-particles" id="magicParticles"></div>
+    
+    <div class="container">
+        <h2>🥤 Thimbles Magic 🥤</h2>
+        
+        <div class="game-header">
+            <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+            
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div>🎯 Aciertos</div>
+                    <div class="stat-value" id="wins">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>❌ Fallos</div>
+                    <div class="stat-value" id="losses">0</div>
+                </div>
+                <div class="stat-item">
+                    <div>🔥 Racha</div>
+                    <div class="stat-value" id="streak">0</div>
+                </div>
+            </div>
+            
+            <div class="bet-section">
+                <input type="number" id="apuesta" placeholder="💰 Ingresa tu apuesta" min="1">
+                <button class="start-btn" id="startBtn">🎮 Comenzar Juego</button>
+            </div>
+        </div>
+
+        <div class="game-instructions">
+            <div class="instructions-text">🎲 ¿Cómo Jugar?</div>
+            <div class="instructions-detail">
+                La pelota dorada está escondida bajo uno de los tres vasos. 
+                ¡Adivina cuál es y duplica tu apuesta! 🏆
+            </div>
+        </div>
+
+        <div class="thimbles-container">
+            <div class="shuffle-animation" id="shuffleText">
+                ✨ Mezclando los vasos... ✨
+            </div>
+            <div id="thimbles"></div>
+        </div>
+
+        <div class="result-display" id="resultDisplay"></div>
+
+        <button class="back-btn" onclick="volverMenu()">🏠 Volver al Menú</button>
+    </div>
+
+    <script>
+        let users = JSON.parse(localStorage.getItem("users")) || {};
+        let currentUser = localStorage.getItem("currentUser");
+        let saldoEl = document.getElementById("saldo");
+        let gameState = {
+            ballPosition: 0,
+            currentBet: 0,
+            gameActive: false,
+            wins: parseInt(localStorage.getItem(`${currentUser}_thimbles_wins`)) || 0,
+            losses: parseInt(localStorage.getItem(`${currentUser}_thimbles_losses`)) || 0,
+            streak: parseInt(localStorage.getItem(`${currentUser}_thimbles_streak`)) || 0
+        };
+
+        // Crear partículas mágicas
+        function createMagicParticles() {
+            const particles = document.getElementById('magicParticles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('magic-particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = Math.random() * 6 + 2 + 'px';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        function updateSaldo() { 
+            users = JSON.parse(localStorage.getItem("users")) || {};
+            const currentSaldo = parseInt(saldoEl.innerText) || 0;
+            const newSaldo = users[currentUser].saldo;
+            
+            const increment = (newSaldo - currentSaldo) / 20;
+            let current = currentSaldo;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= newSaldo) || 
+                    (increment < 0 && current <= newSaldo)) {
+                    current = newSaldo;
+                    clearInterval(timer);
+                }
+                saldoEl.innerText = Math.floor(current);
+            }, 30);
+        }
+
+        function updateStats() {
+            document.getElementById('wins').textContent = gameState.wins;
+            document.getElementById('losses').textContent = gameState.losses;
+            document.getElementById('streak').textContent = gameState.streak;
+        }
+
+        function saveStats() {
+            localStorage.setItem(`${currentUser}_thimbles_wins`, gameState.wins);
+            localStorage.setItem(`${currentUser}_thimbles_losses`, gameState.losses);
+            localStorage.setItem(`${currentUser}_thimbles_streak`, gameState.streak);
+        }
+
+        function showResult(message, type) {
+            const resultEl = document.getElementById('resultDisplay');
+            resultEl.innerHTML = message;
+            resultEl.className = `result-display ${type}`;
+            resultEl.style.display = 'block';
+            
+            setTimeout(() => {
+                resultEl.style.display = 'none';
+            }, 4000);
+        }
+
+        function createCups() {
+            const thimblesDiv = document.getElementById("thimbles");
+            thimblesDiv.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                let cup = document.createElement("div");
+                cup.classList.add("cup");
+                cup.dataset.index = i;
+                cup.addEventListener("click", () => pickCup(i));
+                
+                // Añadir indicador de pelota (oculto inicialmente)
+                let ballIndicator = document.createElement("div");
+                ballIndicator.classList.add("ball-indicator");
+                cup.appendChild(ballIndicator);
+                
+                thimblesDiv.appendChild(cup);
+            }
+        }
+
+        function shuffleAnimation() {
+            const cups = document.querySelectorAll(".cup");
+            const shuffleText = document.getElementById('shuffleText');
+            
+            shuffleText.style.display = 'block';
+            cups.forEach(cup => cup.classList.add('shuffling'));
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    cups.forEach(cup => cup.classList.remove('shuffling'));
+                    shuffleText.style.display = 'none';
+                    resolve();
+                }, 2000);
+            });
+        }
+
+        document.getElementById("startBtn").addEventListener("click", async () => {
+            if (gameState.gameActive) return;
+            
+            let apuesta = parseInt(document.getElementById("apuesta").value);
+            if (!apuesta || apuesta > users[currentUser].saldo) { 
+                alert("💸 Apuesta inválida"); 
+                return; 
+            }
+            
+            gameState.gameActive = true;
+            gameState.currentBet = apuesta;
+            users[currentUser].saldo -= apuesta;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateSaldo();
+
+            // Generar posición aleatoria de la pelota
+            gameState.ballPosition = Math.floor(Math.random() * 3);
+            
+            createCups();
+            await shuffleAnimation();
+            
+            document.getElementById("startBtn").disabled = true;
+        });
+
+        function pickCup(index) {
+            if (!gameState.gameActive) return;
+            
+            const cups = document.querySelectorAll(".cup");
+            const ballIndicators = document.querySelectorAll(".ball-indicator");
+            
+            // Desactivar clics
+            gameState.gameActive = false;
+            cups.forEach(cup => cup.style.pointerEvents = 'none');
+            
+            if (index === gameState.ballPosition) {
+                // ¡Ganó!
+                cups[index].classList.add("correct");
+                ballIndicators[index].style.display = 'block';
+                
+                const winnings = gameState.currentBet * 2;
+                users[currentUser].saldo += winnings;
+                localStorage.setItem("users", JSON.stringify(users));
+                
+                gameState.wins++;
+                gameState.streak++;
+                
+                showResult(`🎉 ¡Excelente! ¡Ganaste ${winnings} créditos! 🎉<br>💎 Racha: ${gameState.streak}`, 'win');
+                
+            } else {
+                // Perdió
+                cups[index].classList.add("wrong");
+                cups[gameState.ballPosition].classList.add("correct");
+                ballIndicators[gameState.ballPosition].style.display = 'block';
+                
+                gameState.losses++;
+                gameState.streak = 0;
+                
+                showResult(`😔 ¡Fallaste! La pelota estaba en el vaso ${gameState.ballPosition + 1} 😔<br>💔 Perdiste ${gameState.currentBet} créditos`, 'lose');
+            }
+            
+            updateSaldo();
+            updateStats();
+            saveStats();
+            
+            // Reactivar después de 3 segundos
+            setTimeout(() => {
+                document.getElementById("startBtn").disabled = false;
+                cups.forEach(cup => {
+                    cup.style.pointerEvents = 'auto';
+                    cup.classList.remove('correct', 'wrong');
+                });
+                ballIndicators.forEach(ball => ball.style.display = 'none');
+            }, 3000);
+        }
+
+        function volverMenu() { 
+            window.location.href = "../index.html"; 
+        }
+
+        // Inicialización
+        window.onload = () => {
+            createMagicParticles();
+            updateSaldo();
+            updateStats();
+        };
+    </script>
+</body>
+</html>

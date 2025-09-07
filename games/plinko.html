@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏀 Plinko 🏀</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff; 
+            text-align: center; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        h2 { 
+            font-size: 3rem; 
+            margin-bottom: 20px; 
+            color: #ffd700; 
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        .balance { 
+            font-size: 1.5rem; 
+            margin-bottom: 20px; 
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .controls {
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 20px;
+            border-radius: 15px; 
+            margin-bottom: 20px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px;
+        }
+        input {
+            padding: 12px; 
+            font-size: 16px; 
+            border-radius: 8px; 
+            border: none;
+            text-align: center; 
+            width: 180px;
+        }
+        button {
+            padding: 12px 25px; 
+            font-size: 16px; 
+            cursor: pointer;
+            border-radius: 8px; 
+            border: none; 
+            color: white;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            transition: all 0.2s ease;
+            font-weight: bold;
+            border-bottom: 4px solid #cc5500;
+        }
+        button:hover:not(:disabled) { 
+            transform: translateY(-3px); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:disabled { 
+            background: #555; 
+            cursor: not-allowed; 
+            opacity: 0.6; 
+        }
+        #plinko-container {
+            position: relative;
+            width: 600px;
+            margin: 30px auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+        }
+        .plinko-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .row { 
+            display: flex; 
+        }
+        .peg {
+            width: 14px; 
+            height: 14px;
+            background-color: #ffd700;
+            border-radius: 50%;
+            margin: 10px;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+        }
+        .multipliers {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .multiplier {
+            width: 50px; 
+            height: 40px;
+            background: #2c3e50;
+            border-radius: 5px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+            border: 2px solid #7f8c8d;
+        }
+        .multiplier.active {
+            background: #f7931e;
+            color: #000;
+            box-shadow: 0 0 15px #f7931e;
+            transform: scale(1.1);
+        }
+        #ball {
+            position: absolute;
+            width: 20px; 
+            height: 20px;
+            background: radial-gradient(circle, #ff8c00, #ff4500);
+            border-radius: 50%;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.8);
+        }
+        #result { 
+            font-size: 1.5rem; 
+            margin-top: 20px; 
+            font-weight: bold; 
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .win-text {
+            color: #2ed573;
+        }
+        .lose-text {
+            color: #ff4757;
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .back-button:hover {
+            background: #555;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🏀 Plinko 🏀</h2>
+        <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+
+        <div class="controls">
+            <input type="number" id="apuesta" placeholder="Ingresa tu apuesta" min="1">
+            <button id="dropBtn">Soltar Bola</button>
+        </div>
+
+        <div id="plinko-container">
+            <div id="ball"></div>
+            <div class="plinko-board" id="board"></div>
+            <div class="multipliers" id="multiplier-slots"></div>
+        </div>
+        
+        <div id="result"></div>
+        <a href="../index.html" class="back-button">🏠 Volver al Menú</a>
+    </div>
+
+    <script>
+        const users = JSON.parse(localStorage.getItem("users")) || {};
+        let currentUser = localStorage.getItem("currentUser");
+        const saldoEl = document.getElementById("saldo");
+        const boardDiv = document.getElementById("board");
+        const multipliersDiv = document.getElementById("multiplier-slots");
+        const resultDiv = document.getElementById("result");
+        const dropBtn = document.getElementById("dropBtn");
+        const ball = document.getElementById("ball");
+        const apuestaInput = document.getElementById("apuesta");
+        
+        const ROWS = 10;
+        const multipliers = [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22];
+
+        function updateSaldo() {
+            if (users[currentUser]) {
+                saldoEl.innerText = Math.floor(users[currentUser].saldo).toLocaleString();
+            }
+        }
+
+        function generateBoard() {
+            // Generar postes (10 filas)
+            for (let r = 0; r < ROWS; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.classList.add('row');
+                // Cada fila tiene r+1 clavijas
+                for (let c = 0; c <= r; c++) {
+                    const peg = document.createElement('div');
+                    peg.classList.add('peg');
+                    rowDiv.appendChild(peg);
+                }
+                boardDiv.appendChild(rowDiv);
+            }
+            
+            // Generar multiplicadores (11 slots)
+            multipliers.forEach(m => {
+                const slot = document.createElement('div');
+                slot.classList.add('multiplier');
+                slot.textContent = `x${m}`;
+                multipliersDiv.appendChild(slot);
+            });
+        }
+
+        dropBtn.addEventListener("click", async () => {
+            const apuesta = parseInt(apuestaInput.value);
+            if (!apuesta || apuesta <= 0 || apuesta > users[currentUser].saldo) {
+                resultDiv.innerHTML = '<span class="lose-text">Apuesta inválida. Ingresa un monto menor o igual a tu saldo.</span>';
+                return;
+            }
+
+            // Descontar apuesta
+            users[currentUser].saldo -= apuesta;
+            localStorage.setItem("users", JSON.stringify(users));
+            updateSaldo();
+            
+            dropBtn.disabled = true;
+            apuestaInput.disabled = true;
+            resultDiv.innerText = '';
+            
+            // Reset multiplicadores
+            document.querySelectorAll('.multiplier').forEach(m => m.classList.remove('active'));
+            
+            // Mostrar bola
+            ball.style.opacity = 1;
+            ball.style.transition = 'none';
+            ball.style.transform = 'translateX(-50%) translateY(0)';
+            
+            // Simular caída
+            let path = 0; // 0 = centro, valores negativos izquierda, positivos derecha
+            
+            // Animación de caída con rebotes
+            for (let i = 1; i <= ROWS; i++) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Decidir dirección aleatoria
+                const direction = Math.random() < 0.5 ? -1 : 1;
+                path += direction;
+                
+                // Calcular posición X (ajustada para el ancho del contenedor)
+                const xOffset = path * 28;
+                const yOffset = i * 36;
+                
+                // Aplicar animación
+                ball.style.transition = `transform ${0.3}s ease-out`;
+                ball.style.transform = `translateX(calc(-50% + ${xOffset}px)) translateY(${yOffset}px)`;
+            }
+
+            // Determinar el índice final (mapear path de [-10,10] a [0,10])
+            let finalIndex = Math.round((path + ROWS) / 2);
+            finalIndex = Math.max(0, Math.min(multipliers.length - 1, finalIndex));
+            
+            // Iluminar el slot ganador
+            const winningSlot = multipliersDiv.children[finalIndex];
+            winningSlot.classList.add('active');
+
+            // Calcular y pagar ganancias
+            const payout = apuesta * multipliers[finalIndex];
+            users[currentUser].saldo += payout;
+            localStorage.setItem("users", JSON.stringify(users));
+            
+            // Mostrar resultado
+            setTimeout(() => {
+                updateSaldo();
+                if (payout > apuesta) {
+                    resultDiv.innerHTML = `<span class="win-text">¡La bola cayó en x${multipliers[finalIndex]}! Ganaste ${payout.toLocaleString()} créditos.</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="lose-text">La bola cayó en x${multipliers[finalIndex]}. ${payout > 0 ? `Recuperaste ${payout.toLocaleString()} créditos.` : 'No recuperaste créditos.'}</span>`;
+                }
+                
+                // Ocultar bola después de un momento
+                setTimeout(() => {
+                    ball.style.opacity = 0;
+                    dropBtn.disabled = false;
+                    apuestaInput.disabled = false;
+                }, 1000);
+            }, 500);
+        });
+
+        // Inicialización
+        if (!currentUser || !users[currentUser]) {
+            window.location.href = "../index.html";
+        } else {
+            updateSaldo();
+            generateBoard();
+        }
+    </script>
+</body>
+</html>
