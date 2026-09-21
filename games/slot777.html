@@ -2,144 +2,337 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🎰 Slot 777 🎰</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot 777 - Casino AC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/casino-shared.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: linear-gradient(45deg, #4a0e0e, #8d2d2d, #3b0909); color: #fff; text-align: center; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h2 { font-size: 3rem; margin-bottom: 20px; color: #ffd700; text-shadow: 0 0 10px #ffd700; }
-        .balance { font-size: 1.5rem; margin-bottom: 20px; }
-        .slot-machine {
-            background: linear-gradient(145deg, #8b4513, #cd853f);
-            padding: 30px; border-radius: 20px;
+        .slot-wrapper {
+            max-width: 800px;
+            margin: 20px auto 50px;
+            padding: 0 15px;
+            text-align: center;
+        }
+
+        .slot-cabinet {
+            background: linear-gradient(145deg, #2a1111, #1a0808);
             border: 8px solid #ffd700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
-            display: inline-block;
+            border-radius: 30px;
+            padding: 35px 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255, 215, 0, 0.2);
+            position: relative;
+            margin-bottom: 25px;
         }
-        .reels { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; background: #000; padding: 20px; border-radius: 10px; }
-        .reel {
-            width: 100px; height: 100px;
-            background-color: #fff;
-            border: 3px solid #ccc;
-            border-radius: 10px;
+
+        .slot-reels-window {
+            background: #0d0f15;
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            border: 4px solid #441a1a;
+            box-shadow: inset 0 10px 25px rgba(0,0,0,0.9);
+            margin-bottom: 25px;
+        }
+
+        .reel-box {
+            width: 125px;
+            height: 135px;
+            background: linear-gradient(145deg, #232734, #151821);
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            font-size: 4rem;
-            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 6px 12px rgba(0,0,0,0.6);
+            user-select: none;
+            transition: transform 0.2s;
         }
-        .reel.spinning { animation: spin 0.1s linear infinite; }
-        @keyframes spin { from { transform: translateY(-20px); } to { transform: translateY(20px); } }
-        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; }
-        input { padding: 10px; font-size: 16px; border-radius: 8px; border: none; text-align: center; }
-        button {
-            padding: 15px 30px; font-size: 18px; cursor: pointer; border-radius: 8px; border: none;
-            color: white; background: linear-gradient(45deg, #2ed573, #20bf6b); transition: transform 0.2s;
-            font-weight: bold;
+
+        .reel-box img.symbol-icon {
+            width: 75px;
+            height: 75px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            transition: transform 0.2s;
         }
-        button:hover { transform: scale(1.05); }
-        #result { font-size: 1.5rem; margin-top: 20px; font-weight: bold; color: #ffd700; min-height: 30px; }
-        .payout-table { margin: 30px auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; max-width: 400px; }
-        .payout-table h3 { margin-bottom: 10px; }
-        .payout-table p { margin: 5px 0; }
+
+        .reel-box.spinning img.symbol-icon {
+            animation: reelSpin 0.08s linear infinite;
+            filter: blur(2px);
+        }
+
+        @keyframes reelSpin {
+            0% { transform: translateY(-20px) scale(0.9); }
+            50% { transform: translateY(20px) scale(1.1); }
+            100% { transform: translateY(-20px) scale(0.9); }
+        }
+
+        .reel-box.win-flash {
+            animation: winFlash 0.5s infinite alternate;
+            border-color: #ffd700;
+        }
+
+        @keyframes winFlash {
+            from { box-shadow: 0 0 10px #ffd700; transform: scale(1); }
+            to { box-shadow: 0 0 25px #ffd700; transform: scale(1.04); }
+        }
+
+        /* Paytable */
+        .paytable-card {
+            background: rgba(22, 26, 38, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--bg-card-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .pay-item {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pay-item img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .pay-item span {
+            color: var(--gold);
+            font-weight: 800;
+        }
+
+        .jackpot-banner {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--gold);
+            min-height: 38px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🎰 Slot 777 🎰</h2>
-        <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+    <div id="gameHeaderNav"></div>
 
-        <div class="slot-machine">
-            <div class="reels">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">🔔</div>
+    <div class="slot-wrapper">
+        <div class="slot-cabinet">
+            <!-- Ventana de Rodillos -->
+            <div class="slot-reels-window">
+                <div class="reel-box" id="reel1">
+                    <img src="../assets/games/slots/seven.svg" class="symbol-icon">
+                </div>
+                <div class="reel-box" id="reel2">
+                    <img src="../assets/games/slots/seven.svg" class="symbol-icon">
+                </div>
+                <div class="reel-box" id="reel3">
+                    <img src="../assets/games/slots/seven.svg" class="symbol-icon">
+                </div>
             </div>
-            <div class="controls">
-                <input type="number" id="apuesta" placeholder="Apuesta" min="1">
-                <button id="spinBtn">GIRAR</button>
+
+            <!-- Controles -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <div class="casino-bet-input-wrap" style="margin: 0; max-width: 160px;">
+                    <input type="number" id="apuesta" value="100" min="10">
+                </div>
+                <button class="casino-btn casino-btn-success" id="spinBtn" style="padding: 14px 40px; font-size: 18px;">
+                    <i class="fas fa-sync-alt"></i> GIRAR
+                </button>
             </div>
+
+            <div class="casino-chips-container" id="chipSelector" style="margin: 15px 0 0;">
+                <div class="casino-chip" data-amount="50">50</div>
+                <div class="casino-chip active" data-amount="100">100</div>
+                <div class="casino-chip" data-amount="250">250</div>
+                <div class="casino-chip" data-amount="500">500</div>
+            </div>
+
+            <div class="jackpot-banner" id="jackpotText">¡Presiona GIRAR para probar suerte!</div>
         </div>
 
-        <div id="result"></div>
-        <div class="payout-table">
-            <h3>Tabla de Pagos</h3>
-            <p>🍒 🍒 🍒 = 5x</p>
-            <p>🍋 🍋 🍋 = 10x</p>
-            <p>🔔 🔔 🔔 = 20x</p>
-            <p>💎 💎 💎 = 50x</p>
-            <p>💰 💰 💰 = 100x</p>
-            <p>7️⃣ 7️⃣ 7️⃣ = 200x</p>
+        <!-- Tabla de Pagos Calibrada (Sin regalos automáticos) -->
+        <div class="paytable-card">
+            <div class="pay-item">
+                <img src="../assets/games/slots/seven.svg">
+                <div>3x Siete</div>
+                <span>x100</span>
+            </div>
+            <div class="pay-item">
+                <img src="../assets/games/slots/moneybag.svg">
+                <div>3x Saco</div>
+                <span>x40</span>
+            </div>
+            <div class="pay-item">
+                <img src="../assets/games/slots/diamond.svg">
+                <div>3x Diamante</div>
+                <span>x25</span>
+            </div>
+            <div class="pay-item">
+                <img src="../assets/games/slots/bell.svg">
+                <div>3x Campana</div>
+                <span>x15</span>
+            </div>
+            <div class="pay-item">
+                <img src="../assets/games/slots/lemon.svg">
+                <div>3x Limón</div>
+                <span>x8</span>
+            </div>
+            <div class="pay-item">
+                <img src="../assets/games/slots/cherry.svg">
+                <div>3x Cereza</div>
+                <span>x5</span>
+            </div>
+            <div class="pay-item">
+                <div style="display: flex; gap: 2px;">
+                    <img src="../assets/games/slots/cherry.svg" style="width: 20px; height: 20px;">
+                    <img src="../assets/games/slots/cherry.svg" style="width: 20px; height: 20px;">
+                </div>
+                <div>2x Cerezas</div>
+                <span>x0.5</span>
+            </div>
         </div>
-        
-        <button onclick="window.location.href='../index.html'">🏠 Volver al Menú</button>
     </div>
 
+    <!-- Scripts -->
+    <script src="../shared/casino-engine.js"></script>
     <script>
-        const users = JSON.parse(localStorage.getItem("users")) || {};
-        let currentUser = localStorage.getItem("currentUser");
-        const saldoEl = document.getElementById("saldo");
-        const spinBtn = document.getElementById("spinBtn");
-        const resultDiv = document.getElementById("result");
-        const reels = [document.getElementById("reel1"), document.getElementById("reel2"), document.getElementById("reel3")];
+        casino.requireAuth();
+        casino.renderHeader('gameHeaderNav', { title: 'Slot 777', backUrl: '../index.html' });
+        casino.setupChips('#chipSelector', '#apuesta');
 
-        const symbols = ['🍒', '🍋', '🔔', '💎', '💰', '7️⃣'];
-        const payouts = { '🍒': 5, '🍋': 10, '🔔': 20, '💎': 50, '💰': 100, '7️⃣': 200 };
+        const symbols = ['seven', 'moneybag', 'diamond', 'bell', 'lemon', 'cherry'];
+        const payouts = {
+            'seven': 100,
+            'moneybag': 40,
+            'diamond': 25,
+            'bell': 15,
+            'lemon': 8,
+            'cherry': 5
+        };
 
-        function updateSaldo() {
-            if (users[currentUser]) {
-                saldoEl.innerText = users[currentUser].saldo.toLocaleString();
-            }
+        const reels = [
+            document.getElementById('reel1'),
+            document.getElementById('reel2'),
+            document.getElementById('reel3')
+        ];
+        const spinBtn = document.getElementById('spinBtn');
+        const apuestaInput = document.getElementById('apuesta');
+        const jackpotText = document.getElementById('jackpotText');
+
+        let isSpinning = false;
+
+        function setReelSymbol(reelEl, symKey) {
+            reelEl.innerHTML = `<img src="../assets/games/slots/${symKey}.svg" class="symbol-icon">`;
         }
 
-        spinBtn.addEventListener("click", () => {
-            const apuesta = parseInt(document.getElementById("apuesta").value);
-            if (!apuesta || apuesta <= 0 || apuesta > users[currentUser].saldo) {
-                alert("Apuesta inválida.");
-                return;
-            }
+        spinBtn.addEventListener('click', () => {
+            if (isSpinning) return;
 
-            users[currentUser].saldo -= apuesta;
-            localStorage.setItem("users", JSON.stringify(users));
-            updateSaldo();
-            
+            const bet = parseInt(apuestaInput.value);
+            if (!casino.deductBet(bet)) return;
+
+            isSpinning = true;
             spinBtn.disabled = true;
-            resultDiv.innerText = '';
-            
-            let spinCount = 0;
+            apuestaInput.disabled = true;
+            jackpotText.innerText = 'Girando los rodillos... ⚡';
+            jackpotText.style.color = '#fff';
+
+            reels.forEach(r => {
+                r.classList.remove('win-flash');
+                r.classList.add('spinning');
+            });
+
+            // Selección de resultado
+            const finalSymbols = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+
+            // Intervalo visual
             const spinInterval = setInterval(() => {
-                reels.forEach(reel => {
-                    reel.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                reels.forEach(r => {
+                    const randSym = symbols[Math.floor(Math.random() * symbols.length)];
+                    setReelSymbol(r, randSym);
                 });
-                spinCount++;
-                if (spinCount > 20) {
-                    clearInterval(spinInterval);
-                    determineResult(apuesta);
-                }
-            }, 100);
+                casino.playSound('chip');
+            }, 80);
+
+            // Parada Progresiva (Staggered Stops)
+            setTimeout(() => {
+                reels[0].classList.remove('spinning');
+                setReelSymbol(reels[0], finalSymbols[0]);
+                casino.playSound('card');
+            }, 1100);
+
+            setTimeout(() => {
+                reels[1].classList.remove('spinning');
+                setReelSymbol(reels[1], finalSymbols[1]);
+                casino.playSound('card');
+            }, 1600);
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                reels[2].classList.remove('spinning');
+                setReelSymbol(reels[2], finalSymbols[2]);
+                casino.playSound('card');
+
+                evaluateOutcome(bet, finalSymbols);
+            }, 2100);
         });
 
-        function determineResult(apuesta) {
-            const resultSymbols = reels.map(() => symbols[Math.floor(Math.random() * symbols.length)]);
-            reels.forEach((reel, i) => reel.innerText = resultSymbols[i]);
-
-            let payout = 0;
-            if (resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
-                payout = apuesta * payouts[resultSymbols[0]];
-                resultDiv.innerText = `¡JACKPOT! Ganaste ${payout.toLocaleString()} créditos.`;
-            } else {
-                resultDiv.innerText = '¡Mejor suerte la próxima vez!';
-            }
-
-            if (payout > 0) {
-                users[currentUser].saldo += payout;
-                localStorage.setItem("users", JSON.stringify(users));
-                updateSaldo();
-            }
-            
+        // Evaluación con Dificultad Real (Sin premios regalados)
+        function evaluateOutcome(bet, results) {
+            isSpinning = false;
             spinBtn.disabled = false;
-        }
+            apuestaInput.disabled = false;
 
-        // Inicialización
-        updateSaldo();
+            const [s1, s2, s3] = results;
+
+            // 3 Iguales: Premio Grande
+            if (s1 === s2 && s2 === s3) {
+                const mult = payouts[s1];
+                const payout = bet * mult;
+                reels.forEach(r => r.classList.add('win-flash'));
+                casino.addPayout(payout, mult, { showToast: true });
+                jackpotText.innerText = `👑 ¡JACKPOT! 3x ${s1.toUpperCase()} (+${payout.toLocaleString()} créditos)`;
+                jackpotText.style.color = '#ffd700';
+            } 
+            // Consuelo: 2 Cerezas solamente
+            else if (
+                (s1 === 'cherry' && s2 === 'cherry') ||
+                (s2 === 'cherry' && s3 === 'cherry') ||
+                (s1 === 'cherry' && s3 === 'cherry')
+            ) {
+                const mult = 0.5;
+                const payout = Math.floor(bet * mult);
+                casino.addPayout(payout, mult, { showToast: true });
+                jackpotText.innerText = `🍒 Dos cerezas: recuperas ${payout.toLocaleString()} créditos.`;
+                jackpotText.style.color = '#2ed573';
+            } 
+            // Derrota
+            else {
+                casino.recordLoss(bet);
+                jackpotText.innerText = '😔 Sin combinación. ¡Prueba de nuevo!';
+                jackpotText.style.color = '#ff4757';
+            }
+        }
     </script>
 </body>
 </html>

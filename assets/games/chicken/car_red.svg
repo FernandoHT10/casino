@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+  <defs>
+    <linearGradient id="redCar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff4757"/>
+      <stop offset="50%" stop-color="#d63031"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+  </defs>
+  <!-- Ruedas -->
+  <rect x="16" y="2" width="22" height="8" rx="3" fill="#111"/>
+  <rect x="82" y="2" width="22" height="8" rx="3" fill="#111"/>
+  <rect x="16" y="50" width="22" height="8" rx="3" fill="#111"/>
+  <rect x="82" y="50" width="22" height="8" rx="3" fill="#111"/>
+  <!-- Chasis -->
+  <rect x="6" y="8" width="108" height="44" rx="10" fill="url(#redCar)" stroke="#ff6b81" stroke-width="1.5" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.6))"/>
+  <!-- Parabrisas delantero (mira a la derecha) -->
+  <path d="M80 14 L94 20 L94 40 L80 46 Z" fill="#74b9ff" opacity="0.85"/>
+  <!-- Ventanillas y techo -->
+  <rect x="36" y="15" width="40" height="30" rx="4" fill="#2d3436" opacity="0.8"/>
+  <path d="M32 14 L24 18 L24 42 L32 46 Z" fill="#74b9ff" opacity="0.7"/>
+  <!-- Faros delanteros -->
+  <circle cx="110" cy="14" r="3.5" fill="#fff" filter="drop-shadow(2px 0 4px #ffd700)"/>
+  <circle cx="110" cy="46" r="3.5" fill="#fff" filter="drop-shadow(2px 0 4px #ffd700)"/>
+</svg>

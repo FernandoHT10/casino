@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 130">
+  <defs>
+    <linearGradient id="goldGoblet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff4b8"/>
+      <stop offset="35%" stop-color="#f5cd2f"/>
+      <stop offset="70%" stop-color="#b8860b"/>
+      <stop offset="100%" stop-color="#543d00"/>
+    </linearGradient>
+  </defs>
+  <!-- Vaso / Cubilete invertido -->
+  <path d="M22 115 L14 30 C14 20, 30 14, 50 14 C70 14, 86 20, 86 30 L78 115 Z" fill="url(#goldGoblet)" stroke="#805b00" stroke-width="2" filter="drop-shadow(0 10px 15px rgba(0,0,0,0.6))"/>
+  <ellipse cx="50" cy="115" rx="28" ry="7" fill="#b8860b" stroke="#543d00" stroke-width="2"/>
+  <ellipse cx="50" cy="24" rx="32" ry="7" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+  <!-- Grabado ornamental central -->
+  <circle cx="50" cy="65" r="14" fill="#805b00" opacity="0.5"/>
+  <polygon points="50,55 54,63 62,63 56,68 58,76 50,71 42,76 44,68 38,63 46,63" fill="#ffd700"/>
+</svg>

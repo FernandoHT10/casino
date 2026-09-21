@@ -3,236 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💼 Maletero Secreto 💼</title>
+    <title>Maletero Secreto - Casino AC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/casino-shared.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(45deg, #1d2b3a, #3c5a78, #16213e); 
-            color: #fff; 
-            text-align: center; 
-            padding: 20px;
-            min-height: 100vh;
+        .briefcase-wrapper {
+            max-width: 900px;
+            margin: 20px auto 50px;
+            padding: 0 15px;
         }
-        .container { max-width: 800px; margin: 0 auto; }
-        h2 { 
-            font-size: 3rem; 
-            margin-bottom: 20px; 
-            color: #ffd700; 
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-        }
-        .balance { font-size: 1.5rem; margin-bottom: 20px; }
-        .controls { 
-            background: rgba(0,0,0,0.2); 
-            padding: 20px; 
-            border-radius: 15px; 
-            margin-bottom: 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 15px;
-        }
-        input { 
-            padding: 12px 20px; 
-            font-size: 16px; 
-            border-radius: 8px; 
-            border: none; 
-            text-align: center; 
-        }
-        button {
-            padding: 12px 25px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            border: none;
-            color: white; 
-            background: linear-gradient(45deg, #007bff, #0056b3); 
-            transition: all 0.2s ease;
-            font-weight: bold;
-            border-bottom: 4px solid #00418a;
-        }
-        button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        button:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
 
-        #game-board { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 20px; 
-            margin: 30px auto; 
-            max-width: 700px; 
+        .briefcase-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin: 30px auto;
             perspective: 1000px;
         }
-        .briefcase-container {
-             aspect-ratio: 1.2;
-             position: relative;
+
+        @media (max-width: 650px) {
+            .briefcase-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
-        .briefcase {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            background: linear-gradient(145deg, #8b4513, #a0522d); 
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 2.5rem;
-            font-weight: bold;
-            transition: all 0.4s ease;
-            border: 4px solid #d4af37;
+
+        .case-card {
+            aspect-ratio: 1.1;
+            position: relative;
             transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border-radius: 14px;
         }
-        .briefcase .front, .briefcase .back {
+
+        .case-card.disabled {
+            pointer-events: none;
+        }
+
+        .case-card:hover:not(.opened):not(.disabled) {
+            transform: translateY(-8px) scale(1.05);
+        }
+
+        .case-card.opened {
+            transform: rotateY(180deg);
+        }
+
+        .case-face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
+            border-radius: 14px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            user-select: none;
+            padding: 10px;
         }
-        .briefcase .front { z-index: 2; transform: rotateY(0deg); }
-        .briefcase .back {
-            transform: rotateY(180deg);
-            font-size: 1.5rem;
-        }
-        .briefcase.opened .front { transform: rotateY(-180deg); }
-        .briefcase.opened .back { transform: rotateY(0deg); }
 
-        .briefcase-container:hover .briefcase { transform: translateY(-10px) scale(1.05); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4); }
-        
-        .briefcase .back.win { background: linear-gradient(145deg, #2ed573, #20bf6b); }
-        .briefcase .back.lose { background: linear-gradient(145deg, #ff4757, #c44569); }
-        
-        #result { 
-            font-size: 1.5rem; 
-            margin-top: 20px; 
-            font-weight: bold; 
-            min-height: 30px; 
-            transition: all 0.3s ease;
+        .case-front {
+            background: linear-gradient(145deg, #242938, #141722);
+            border-color: #ffd700;
+        }
+
+        .case-front img {
+            width: 58px;
+            height: 50px;
+            margin-bottom: 6px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        .case-front .number-label {
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .case-back {
+            transform: rotateY(180deg);
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            text-align: center;
+        }
+
+        .case-back img {
+            width: 52px;
+            height: 46px;
+            margin-bottom: 4px;
+        }
+
+        .case-back.win {
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.3), rgba(30, 130, 76, 0.2));
+            border-color: #2ed573;
+            box-shadow: 0 0 20px rgba(46, 213, 115, 0.4);
+        }
+
+        .case-back.empty {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.3), rgba(150, 45, 62, 0.2));
+            border-color: #ff4757;
+        }
+
+        .result-header-text {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            min-height: 35px;
+            color: var(--gold);
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>💼 Maletero Secreto 💼</h2>
-        <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+    <div id="gameHeaderNav"></div>
 
-        <div class="controls">
-            <input type="number" id="apuesta" placeholder="Ingresa tu apuesta" min="1">
-            <button id="startBtn">Iniciar Juego</button>
+    <div class="briefcase-wrapper">
+        <div class="casino-card" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="casino-chips-container" id="chipSelector" style="margin: 0;">
+                    <div class="casino-chip" data-amount="50">50</div>
+                    <div class="casino-chip active" data-amount="100">100</div>
+                    <div class="casino-chip" data-amount="250">250</div>
+                    <div class="casino-chip" data-amount="500">500</div>
+                    <div class="casino-chip" data-amount="1000">1k</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div class="casino-bet-input-wrap" style="margin: 0; max-width: 160px;">
+                        <input type="number" id="apuesta" value="100" min="10">
+                    </div>
+                    <button class="casino-btn casino-btn-primary" id="startBtn">
+                        <i class="fas fa-play"></i> Iniciar Ronda
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div id="game-board"></div>
-        <div id="result"></div>
-        <a href="../index.html" style="display:inline-block; margin-top: 20px; padding: 10px 20px; background: #333; color: white; text-decoration: none; border-radius: 5px;">🏠 Volver al Menú</a>
+        <div class="casino-card">
+            <div class="result-header-text" id="statusMsg">Selecciona tu apuesta y pulsa Iniciar Ronda</div>
+            <div class="briefcase-grid" id="briefcaseGrid"></div>
+        </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="../shared/casino-engine.js"></script>
     <script>
-        const users = JSON.parse(localStorage.getItem("users")) || {};
-        let currentUser = localStorage.getItem("currentUser");
-        const saldoEl = document.getElementById("saldo");
-        const startBtn = document.getElementById("startBtn");
-        const board = document.getElementById("game-board");
-        const resultDiv = document.getElementById("result");
-        const apuestaInput = document.getElementById("apuesta");
+        casino.requireAuth();
+        casino.renderHeader('gameHeaderNav', { title: 'Maletero Secreto', backUrl: '../index.html' });
+        casino.setupChips('#chipSelector', '#apuesta');
 
-        const multipliers = [0, 0, 0, 0.5, 0.5, 1.5, 1.5, 2, 5, 25];
-        let gameActive = false;
+        // Dificultad Real (60% riesgo de maletín vacío, 40% premios altos)
+        const baseMultipliers = [0, 0, 0, 0, 0, 0, 1.2, 1.8, 2.6, 5.0];
+        let currentMultipliers = [];
         let currentBet = 0;
+        let isGameActive = false;
 
-        function updateSaldo() {
-            if (users[currentUser]) {
-                saldoEl.innerText = Math.floor(users[currentUser].saldo).toLocaleString();
+        const startBtn = document.getElementById('startBtn');
+        const apuestaInput = document.getElementById('apuesta');
+        const briefcaseGrid = document.getElementById('briefcaseGrid');
+        const statusMsg = document.getElementById('statusMsg');
+
+        function renderInitialBoard() {
+            briefcaseGrid.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const card = document.createElement('div');
+                card.className = 'case-card disabled';
+                card.dataset.index = i;
+                card.innerHTML = `
+                    <div class="case-face case-front">
+                        <img src="../assets/games/maletero/briefcase_closed.svg" alt="briefcase">
+                        <span class="number-label">Maletín #${i + 1}</span>
+                    </div>
+                    <div class="case-face case-back">?</div>
+                `;
+                card.addEventListener('click', () => openBriefcase(i, card));
+                briefcaseGrid.appendChild(card);
             }
         }
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [a[i], a[j]] = [a[j], a[i]];
             }
-            return array;
+            return a;
         }
-        
-        startBtn.addEventListener("click", () => {
-            const apuesta = parseInt(apuestaInput.value);
-            if (gameActive) return;
-            if (!apuesta || apuesta <= 0 || apuesta > users[currentUser].saldo) {
-                resultDiv.innerText = 'Apuesta inválida.';
-                resultDiv.style.color = '#ff4757';
-                return;
-            }
 
-            currentBet = apuesta;
-            users[currentUser].saldo -= currentBet;
-            localStorage.setItem("users", JSON.stringify(users));
-            updateSaldo();
+        startBtn.addEventListener('click', () => {
+            if (isGameActive) return;
 
-            gameActive = true;
-            resultDiv.innerText = 'Elige un maletín...';
-            resultDiv.style.color = '#fff';
+            const bet = parseInt(apuestaInput.value);
+            if (!casino.deductBet(bet)) return;
+
+            currentBet = bet;
+            isGameActive = true;
             startBtn.disabled = true;
             apuestaInput.disabled = true;
+            currentMultipliers = shuffle(baseMultipliers);
 
-            const shuffledMultipliers = shuffle([...multipliers]);
-            board.innerHTML = '';
-            shuffledMultipliers.forEach((multiplier, i) => {
-                const container = document.createElement('div');
-                container.className = 'briefcase-container';
-                
-                const briefcase = document.createElement('div');
-                briefcase.classList.add('briefcase');
-                briefcase.dataset.multiplier = multiplier;
-                
-                briefcase.innerHTML = `
-                    <div class="front">💼</div>
-                    <div class="back ${multiplier > 0 ? 'win' : 'lose'}">x${multiplier}</div>
-                `;
-                
-                briefcase.addEventListener('click', openBriefcase, { once: true });
-                
-                container.appendChild(briefcase);
-                board.appendChild(container);
-            });
+            renderInitialBoard();
+            const cards = document.querySelectorAll('.case-card');
+            cards.forEach(c => c.classList.remove('disabled'));
+
+            statusMsg.innerText = '✨ 6 maletines vacíos y 4 con grandes premios. ¡Elige con cuidado!';
+            casino.playSound('click');
         });
 
-        function openBriefcase(event) {
-            if (!gameActive) return;
-            gameActive = false;
+        function openBriefcase(index, cardEl) {
+            if (!isGameActive) return;
+            isGameActive = false;
+
+            const cards = document.querySelectorAll('.case-card');
+            cards.forEach(c => c.classList.add('disabled'));
+
+            const mult = currentMultipliers[index];
+            const backFace = cardEl.querySelector('.case-back');
             
-            const chosenBriefcase = event.currentTarget;
-            const multiplier = parseFloat(chosenBriefcase.dataset.multiplier);
-            const payout = currentBet * multiplier;
-
-            // Animate chosen briefcase
-            chosenBriefcase.classList.add('opened');
-
-            if (payout > 0) {
-                users[currentUser].saldo += payout;
-                localStorage.setItem("users", JSON.stringify(users));
-                resultDiv.innerText = `¡Felicidades! Ganaste ${payout.toLocaleString()} créditos.`;
-                resultDiv.style.color = '#2ed573';
+            if (mult > 0) {
+                backFace.innerHTML = `
+                    <img src="../assets/games/maletero/briefcase_cash.svg">
+                    <div>x${mult.toFixed(1)}</div>
+                `;
+                backFace.className = 'case-face case-back win';
             } else {
-                resultDiv.innerText = '¡Maletín vacío! Has perdido tu apuesta.';
-                resultDiv.style.color = '#ff4757';
+                backFace.innerHTML = `
+                    <div style="font-size: 28px; color: #ff4757; margin-bottom: 4px;">❌</div>
+                    <div>VACÍO</div>
+                `;
+                backFace.className = 'case-face case-back empty';
             }
 
-            // Reveal all others after a delay
+            cardEl.classList.add('opened');
+
+            const payout = Math.floor(currentBet * mult);
             setTimeout(() => {
-                document.querySelectorAll('.briefcase').forEach((b, index) => {
-                    if (b !== chosenBriefcase) {
-                         setTimeout(() => {
-                             b.classList.add('opened');
-                             b.style.opacity = '0.6';
-                         }, index * 100);
+                if (payout > 0) {
+                    casino.addPayout(payout, mult, { showToast: true });
+                    statusMsg.innerText = `🎉 ¡PREMIO! El maletín #${index + 1} contenía x${mult.toFixed(1)} (+${payout.toLocaleString()} créditos).`;
+                    statusMsg.style.color = '#2ed573';
+                } else {
+                    casino.recordLoss(currentBet);
+                    statusMsg.innerText = `😔 El maletín #${index + 1} estaba vacío. Suerte para la próxima.`;
+                    statusMsg.style.color = '#ff4757';
+                }
+
+                cards.forEach((c, idx) => {
+                    if (idx !== index) {
+                        setTimeout(() => {
+                            const m = currentMultipliers[idx];
+                            const bf = c.querySelector('.case-back');
+                            if (m > 0) {
+                                bf.innerHTML = `<img src="../assets/games/maletero/briefcase_cash.svg" style="width: 35px; height: 35px;"><div>x${m.toFixed(1)}</div>`;
+                                bf.className = 'case-face case-back win';
+                            } else {
+                                bf.innerHTML = `<div style="font-size: 20px; color: #ff4757;">❌</div><div>0x</div>`;
+                                bf.className = 'case-face case-back empty';
+                            }
+                            c.classList.add('opened');
+                            c.style.opacity = '0.5';
+                        }, (idx + 1) * 90);
                     }
                 });
-                updateSaldo();
-                startBtn.disabled = false;
-                apuestaInput.disabled = false;
-            }, 2000);
+
+                setTimeout(() => {
+                    startBtn.disabled = false;
+                    apuestaInput.disabled = false;
+                    statusMsg.style.color = 'var(--gold)';
+                }, 2200);
+            }, 500);
         }
 
-        updateSaldo();
+        renderInitialBoard();
     </script>
 </body>
 </html>

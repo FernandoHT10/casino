@@ -1,61 +1,443 @@
+/* Estilos del Lobby Principal Casino AC */
+:root {
+    --primary-grad: linear-gradient(135deg, #ff6b35, #f7931e);
+    --gold-grad: linear-gradient(135deg, #ffd700, #ffb300);
+    --neon-blue: #00f2fe;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #121212;
+    background: radial-gradient(circle at 50% 20%, #151928 0%, #0c0e17 60%, #05060a 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Partículas y brillo ambiental */
+.ambient-glow {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particles-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lobby-container {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+}
+
+/* Header */
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 25px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.casino-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.brand-icon {
+    font-size: 2.8rem;
+    animation: rotateSlow 20s linear infinite;
+}
+
+@keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.brand-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #ffd700, #ff8c00, #ff5e36, #ffd700);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* User Card Dashboard */
+.user-dashboard {
+    background: rgba(22, 26, 38, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px 35px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar-frame {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: var(--primary-grad);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.user-meta h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
     color: #fff;
 }
 
-h1, h2, h3 {
+.balance-counter {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-stats-strip {
+    display: flex;
+    gap: 15px;
+}
+
+.stat-pill {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 18px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 90px;
+}
+
+.stat-pill-val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--neon-blue);
+    display: block;
+}
+
+.stat-pill-lbl {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Grid de Juegos */
+.section-heading {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 25px;
+}
+
+.game-card {
+    background: rgba(22, 26, 38, 0.65);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 28px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-grad);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.25);
+    background: rgba(30, 35, 52, 0.85);
+}
+
+.game-card:hover::before {
+    opacity: 1;
+}
+
+.game-card-icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    transition: transform 0.35s ease;
+}
+
+.game-card:hover .game-card-icon {
+    transform: scale(1.2) rotate(6deg);
+}
+
+.game-card-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.game-card-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 18px;
+    flex-grow: 1;
+}
+
+.game-card-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    align-self: center;
+}
+
+/* Formularios de Login / Registro */
+.auth-wrapper {
+    max-width: 440px;
+    margin: 40px auto;
+    background: rgba(22, 26, 38, 0.85);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     text-align: center;
 }
 
-#form-container {
-    max-width: 300px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.auth-header h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #fff;
 }
 
-input {
-    padding: 10px;
+.auth-header p {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+.auth-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.auth-field i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    transition: color 0.25s;
+}
+
+.auth-field input {
+    width: 100%;
+    padding: 16px 16px 16px 50px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
     font-size: 16px;
-    border-radius: 5px;
-    border: none;
+    outline: none;
+    transition: all 0.25s ease;
 }
 
-button {
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    border: none;
-    background-color: #2196f3;
-    color: white;
+.auth-field input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px var(--gold-glow);
 }
 
-button:hover {
-    background-color: #1976d2;
+.auth-field input:focus + i {
+    color: var(--gold);
 }
 
-.games-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.auth-msg {
+    margin-top: 15px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-height: 24px;
+}
+
+/* Modales */
+.casino-modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    align-items: center;
     justify-content: center;
 }
 
-.games-list a {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
+.casino-modal-backdrop.open {
+    display: flex;
 }
 
-.games-list a:hover {
-    background-color: #555;
+.casino-modal-box {
+    background: #141724;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    position: relative;
+    animation: modalIn 0.3s ease-out;
 }
 
-#game { margin-top: 20px; }
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.casino-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #fff;
+}
+
+/* Tienda Items */
+.shop-item-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.25s;
+}
+
+.shop-item-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--gold);
+}
+
+.shop-item-info h4 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.shop-item-info p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .user-dashboard {
+        flex-direction: column;
+        text-align: center;
+    }
+    .user-profile {
+        flex-direction: column;
+    }
+    .brand-title {
+        font-size: 1.8rem;
+    }
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+}

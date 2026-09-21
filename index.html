@@ -3,954 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino AC</title>
+    <title>Casino AC - Luxury Gaming</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #ff6b35;
-            --secondary: #f7931e;
-            --accent: #ffd700;
-            --dark: #1a1a2e;
-            --darker: #0f3460;
-            --light: #f8f9fa;
-            --success: #2ed573;
-            --danger: #ff4757;
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --text: #fff;
-            --shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(45deg, var(--dark), var(--darker), #16213e);
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: background 0.5s ease;
-        }
-
-        body.light-mode {
-            --dark: #e9ecef;
-            --darker: #dee2e6;
-            --card-bg: rgba(0, 0, 0, 0.1);
-            --text: #212529;
-            background: linear-gradient(45deg, #e9ecef, #dee2e6, #ced4da);
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Partículas mejoradas */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-        }
-
-        .container {
-            position: relative;
-            z-index: 10;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Header mejorado */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: var(--accent);
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            transform: rotate(30deg);
-            box-shadow: var(--shadow);
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 3.5rem;
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, var(--accent), var(--primary), var(--secondary), var(--accent));
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientText 3s ease infinite;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
-        }
-
-        @keyframes gradientText {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .welcome-banner {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            animation: slideDown 0.8s ease-out;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, var(--primary), var(--accent), var(--secondary));
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        #login-register {
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        #form-container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--shadow);
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--primary);
-        }
-
-        input {
-            width: 100%;
-            padding: 15px 15px 15px 45px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 10px;
-            border: none;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s ease;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:active {
-            transform: translateY(-1px);
-        }
-
-        #menu {
-            animation: slideUp 0.8s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .user-info {
-            background: rgba(255, 215, 0, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .user-details {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            border: 2px solid var(--accent);
-        }
-
-        .user-stats {
-            display: flex;
-            gap: 20px;
-        }
-
-        .stat {
-            background: var(--card-bg);
-            padding: 10px 15px;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: var(--accent);
-            font-size: 1.2rem;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .balance {
-            font-size: 1.5rem;
-            color: var(--accent);
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .game-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: var(--text);
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
-            background-size: 400% 400%;
-            border-radius: 15px;
-            z-index: -1;
-            opacity: 0;
-            animation: gradientBorder 3s ease infinite;
-            transition: opacity 0.3s ease;
-        }
-
-        @keyframes gradientBorder {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .game-card:hover::before {
-            opacity: 1;
-        }
-
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .game-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            animation: bounce 2s ease infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        .game-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .game-description {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 15px;
-        }
-
-        .game-popularity {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: var(--accent);
-        }
-
-        .game-popularity i {
-            margin-right: 5px;
-        }
-
-        #message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .message-show {
-            background: rgba(255, 107, 53, 0.2);
-            border: 1px solid rgba(255, 107, 53, 0.5);
-            animation: messageSlide 0.5s ease-out;
-        }
-
-        @keyframes messageSlide {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .logout-btn {
-            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
-            margin-top: 20px;
-            width: auto;
-            padding: 10px 20px;
-        }
-
-        .logout-btn:hover {
-            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.4) !important;
-        }
-
-        /* Nuevos elementos */
-        .notification-bell {
-            position: relative;
-            background: var(--card-bg);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--accent);
-            transition: all 0.3s ease;
-        }
-
-        .notification-bell:hover {
-            transform: rotate(15deg);
-            box-shadow: var(--shadow);
-        }
-
-        .notification-dot {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 12px;
-            height: 12px;
-            background: var(--danger);
-            border-radius: 50%;
-            border: 2px solid var(--dark);
-        }
-
-        .shop-btn {
-            background: linear-gradient(45deg, #2ed573, #20bf6b) !important;
-            margin-top: 20px;
-            width: auto;
-            padding: 10px 20px;
-        }
-
-        .shop-btn:hover {
-            box-shadow: 0 10px 25px rgba(46, 213, 115, 0.4) !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .games-grid { grid-template-columns: 1fr; }
-            .container { padding: 15px; }
-            .user-info { flex-direction: column; gap: 15px; }
-            .user-stats { width: 100%; justify-content: space-around; }
-        }
-
-        /* ModaL de notificaciones */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border-radius: 15px;
-            padding: 25px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: var(--shadow);
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text);
-            cursor: pointer;
-            width: auto;
-            padding: 0;
-        }
-
-        .notification-item {
-            padding: 15px;
-            margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border-left: 3px solid var(--primary);
-        }
-
-        .notification-item.unread {
-            border-left: 3px solid var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="shared/casino-shared.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
-    <div class="container">
-        <div class="header">
-            <button class="theme-toggle" id="themeToggle">
-                <i class="fas fa-moon"></i>
-            </button>
-            <h1> Casino Web </h1>
-            <div class="notification-bell" id="notificationBell">
-                <i class="fas fa-bell"></i>
-                <div class="notification-dot" id="notificationDot"></div>
-            </div>
-        </div>
+    <div class="ambient-glow"></div>
+    <canvas id="particlesCanvas" class="particles-canvas"></canvas>
 
-        <div id="login-register">
-            <div class="welcome-banner">
-                <h2>🌟 ¡Bienvenido al Casino HC ! 🌟</h2>
-                <p>Juego en Desarrollo pero funcionales.</p>
+    <div class="lobby-container">
+        <!-- Header con Asset Vectorial -->
+        <header class="lobby-header">
+            <div class="casino-brand">
+                <img src="assets/ui/crown.svg" alt="Crown" style="width: 42px; height: 42px;">
+                <span class="brand-title">CASINO ROYAL AC</span>
             </div>
-            <div id="form-container">
-                <div class="input-group">
+            <div>
+                <button class="casino-nav-btn" id="notificationBell" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationDot" style="width: 8px; height: 8px; background: #ff4757; border-radius: 50%; display: inline-block;"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sección de Autenticación (Login / Registro) -->
+        <section id="authSection" class="auth-wrapper">
+            <div class="auth-header">
+                <h2>Bienvenido</h2>
+                <p>Inicia sesión o regístrate para jugar y ganar créditos</p>
+            </div>
+            <div>
+                <div class="auth-field">
+                    <input type="text" id="username" placeholder="Nombre de usuario" autocomplete="username">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="Nombre de usuario">
                 </div>
-                <div class="input-group">
+                <div class="auth-field">
+                    <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Contraseña">
                 </div>
-                <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-                <button id="registerBtn"><i class="fas fa-user-plus"></i> Registrarse</button>
-                <p id="message"></p>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                    <button class="casino-btn casino-btn-primary" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button class="casino-btn casino-nav-btn" id="registerBtn" style="justify-content: center; padding: 14px;">
+                        <i class="fas fa-user-plus"></i> Crear Cuenta Nueva (+10,000)
+                    </button>
+                </div>
+                <div class="auth-msg" id="authMessage"></div>
             </div>
-        </div>
+        </section>
 
-        <div id="menu" style="display:none;">
-            <div class="user-info">
-                <div class="user-details">
-                    <div class="avatar">
+        <!-- Menú Principal (Visible tras Login) -->
+        <section id="menuSection" style="display: none;">
+            <!-- Dashboard de Usuario -->
+            <div class="user-dashboard">
+                <div class="user-profile">
+                    <div class="user-avatar-frame" id="userAvatarIcon">
                         <i class="fas fa-user"></i>
                     </div>
-                    <div>
-                        <h2 id="displayUser">Usuario</h2>
-                        <div class="balance">💰 Saldo: <span id="displaySaldo">0</span> créditos</div>
+                    <div class="user-meta">
+                        <h2 id="displayUser">Jugador</h2>
+                        <div class="balance-counter">
+                            <img src="assets/ui/coin.svg" alt="Coin" style="width: 28px; height: 28px;">
+                            <span id="displaySaldo">10,000</span>
+                            <small style="font-size: 0.85rem; color: var(--gold); font-weight: 600;">créditos</small>
+                        </div>
                     </div>
                 </div>
-                <div class="user-stats">
-                    <div class="stat">
-                        <span class="stat-value" id="userLevel">1</span>
-                        <span class="stat-label">Nivel</span>
+
+                <div class="user-stats-strip">
+                    <div class="stat-pill">
+                        <span class="stat-pill-val" id="userLevel">1</span>
+                        <span class="stat-pill-lbl">Nivel</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-value" id="userXP">0</span>
-                        <span class="stat-label">XP</span>
+                    <div class="stat-pill">
+                        <span class="stat-pill-val" id="userXP">0</span>
+                        <span class="stat-pill-lbl">XP</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-value" id="userCoins">0</span>
-                        <span class="stat-label">Fichas</span>
+                    <div class="stat-pill">
+                        <span class="stat-pill-val" id="userCoins">100</span>
+                        <span class="stat-pill-lbl">Fichas VIP</span>
                     </div>
                 </div>
+
+                <div class="user-actions">
+                    <button class="casino-btn casino-btn-success" id="shopBtn">
+                        <i class="fas fa-store"></i> Tienda & Bonos
+                    </button>
+                    <button class="casino-nav-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
+                </div>
             </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="shop-btn" id="shopBtn"><i class="fas fa-store"></i> Tienda</button>
-                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-            </div>
-            
-            <h3 style="text-align: center; margin: 30px 0; font-size: 2rem;">🎮 Juegos Disponibles 🎮</h3>
-            
+
+            <!-- Cuadrícula de Juegos con Assets SVG -->
+            <h3 class="section-heading">
+                <i class="fas fa-gamepad" style="color: var(--gold);"></i> Juegos Disponibles <i class="fas fa-gamepad" style="color: var(--gold);"></i>
+            </h3>
+
             <div class="games-grid">
                 <a href="games/blackjack.html" class="game-card">
-                    <div class="game-icon">🃏</div>
-                    <div class="game-title">Blackjack Royal</div>
-                    <div class="game-description">Enfréntate al crupier y llega a 21 sin pasarte</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
+                    <div class="game-card-icon">
+                        <img src="assets/games/cards/spade.svg" alt="Blackjack" style="width: 60px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Blackjack Royal</h4>
+                    <p class="game-card-desc">Enfréntate al crupier para llegar a 21 con pago 3:2 en Blackjack y cartas vectoriales.</p>
+                    <span class="game-card-badge"><i class="fas fa-fire"></i> Cartas Reales • 3:2</span>
                 </a>
-                
-                <a href="games/mines.html" class="game-card">
-                    <div class="game-icon">💣</div>
-                    <div class="game-title">Mines Explosive</div>
-                    <div class="game-description">Encuentra gemas y evita las minas explosivas</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
-                    </div>
-                </a>
-                
-                <a href="games/plinko.html" class="game-card">
-                    <div class="game-icon">🏀</div>
-                    <div class="game-title">Plinko</div>
-                    <div class="game-description">Deja caer la pelota y mira dónde cae</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
-                    </div>
-                </a>
-                
+
                 <a href="games/ruleta.html" class="game-card">
-                    <div class="game-icon">🎡</div>
-                    <div class="game-title">Ruleta Europea</div>
-                    <div class="game-description">La emoción del juego de la ruleta clásica</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i>
+                    <div class="game-card-icon">
+                        <img src="assets/ui/coin.svg" alt="Ruleta" style="width: 60px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Ruleta Europea</h4>
+                    <p class="game-card-desc">Ruleta clásica de 37 casillas sin pantallas bloqueantes. ¡Giro 100% visible!</p>
+                    <span class="game-card-badge"><i class="fas fa-crown"></i> 37 Casillas • Hasta 36x</span>
                 </a>
-                
+
+                <a href="games/mines.html" class="game-card">
+                    <div class="game-card-icon">
+                        <img src="assets/games/mines/mine.svg" alt="Mines" style="width: 60px; height: 60px;">
+                    </div>
+                    <h4 class="game-card-title">Mines Explosive</h4>
+                    <p class="game-card-desc">Descubre gemas esmeralda esquivando minas de alarma con multiplicadores balanceados.</p>
+                    <span class="game-card-badge"><i class="fas fa-gem"></i> Estrategia • Dificultad Calibrada</span>
+                </a>
+
+                <a href="games/plinko.html" class="game-card">
+                    <div class="game-card-icon">
+                        <img src="assets/games/thimbles/golden_ball.svg" alt="Plinko" style="width: 60px; height: 60px;">
+                    </div>
+                    <h4 class="game-card-title">Plinko Neon</h4>
+                    <p class="game-card-desc">Física en tiempo real por Canvas con curva en campana auténtica (hasta 30x en extremos).</p>
+                    <span class="game-card-badge"><i class="fas fa-bolt"></i> Física Real • Hasta 30x</span>
+                </a>
+
                 <a href="games/thimbles.html" class="game-card">
-                    <div class="game-icon">🥤</div>
-                    <div class="game-title">Thimbles Magic</div>
-                    <div class="game-description">¿Dónde está la bolita? ¡Adivina y gana!</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
+                    <div class="game-card-icon">
+                        <img src="assets/games/thimbles/goblet.svg" alt="Thimbles" style="width: 60px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Thimbles Magic</h4>
+                    <p class="game-card-desc">Cubiletes dorados intercambiando posiciones físicas con bolita 100% oculta durante el shuffle.</p>
+                    <span class="game-card-badge"><i class="fas fa-magic"></i> Shuffle Real • 2.9x</span>
                 </a>
-                
+
                 <a href="games/maletero.html" class="game-card">
-                    <div class="game-icon">💼</div>
-                    <div class="game-title">Maletero Secreto</div>
-                    <div class="game-description">Elige el maletín correcto y gana grandes premios</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
+                    <div class="game-card-icon">
+                        <img src="assets/games/maletero/briefcase_closed.svg" alt="Maletero" style="width: 65px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Maletero Secreto</h4>
+                    <p class="game-card-desc">10 maletines de lujo: 50% de probabilidad de fallo y grandes premios de hasta 15x.</p>
+                    <span class="game-card-badge"><i class="fas fa-briefcase"></i> Alto Riesgo • Hasta 15x</span>
                 </a>
-                
+
                 <a href="games/slot777.html" class="game-card">
-                    <div class="game-icon">🎰</div>
-                    <div class="game-title">Slot 777</div>
-                    <div class="game-description">Tragamonedas clásicas con grandes jackpots</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i> 
+                    <div class="game-card-icon">
+                        <img src="assets/games/slots/seven.svg" alt="Slot 777" style="width: 60px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Slot 777</h4>
+                    <p class="game-card-desc">Rodillos con símbolos vectoriales auténticos y paradas escalonadas (Jackpot 100x).</p>
+                    <span class="game-card-badge"><i class="fas fa-star"></i> Auténtico • Jackpot 100x</span>
                 </a>
-                
+
                 <a href="games/chickenroad.html" class="game-card">
-                    <div class="game-icon">🐔</div>
-                    <div class="game-title">Chicken Road</div>
-                    <div class="game-description">Ayuda al pollo a cruzar la carretera</div>
-                    <div class="game-popularity">
-                        <i class="fas fa-fire"></i>
+                    <div class="game-card-icon">
+                        <img src="assets/games/chicken/chicken.svg" alt="Chicken Road" style="width: 60px; height: 60px;">
                     </div>
+                    <h4 class="game-card-title">Chicken Road</h4>
+                    <p class="game-card-desc">Guía la gallina esquivando tráfico realista cenital con riesgo acelerado carril a carril.</p>
+                    <span class="game-card-badge"><i class="fas fa-road"></i> Acción • Riesgo Progresivo</span>
                 </a>
             </div>
+        </section>
+    </div>
+
+    <!-- Modal de Tienda & Bonos -->
+    <div class="casino-modal-backdrop" id="shopModal">
+        <div class="casino-modal-box">
+            <div class="casino-modal-header">
+                <h3 style="color: var(--gold); display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-store"></i> Tienda VIP & Recompensas
+                </h3>
+                <button class="modal-close-btn" id="closeShopBtn">&times;</button>
+            </div>
+
+            <!-- Bono Diario -->
+            <div class="shop-item-card">
+                <div class="shop-item-info">
+                    <h4><img src="assets/ui/coin.svg" style="width: 18px; height: 18px; vertical-align: middle;"> Bono Diario</h4>
+                    <p>Reclama +2,000 créditos gratis cada 24 horas.</p>
+                </div>
+                <button class="casino-btn casino-btn-primary" id="claimDailyBonusBtn" style="padding: 10px 18px; font-size: 14px;">
+                    Reclamar
+                </button>
+            </div>
+
+            <!-- Canje de Fichas -->
+            <div class="shop-item-card">
+                <div class="shop-item-info">
+                    <h4>🪙 Canje de Fichas VIP</h4>
+                    <p>Canjea 50 Fichas por 1,000 créditos de juego.</p>
+                </div>
+                <button class="casino-btn casino-btn-success" id="exchangeCoinsBtn" style="padding: 10px 18px; font-size: 14px;">
+                    Canjear
+                </button>
+            </div>
+
+            <h4 style="color: #fff; margin: 20px 0 12px; font-size: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                🎭 Avatares VIP
+            </h4>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="shop-item-card" style="margin-bottom: 0; padding: 12px;">
+                    <img src="assets/ui/crown.svg" style="width: 32px; height: 32px;">
+                    <div style="flex-grow: 1; margin-left: 10px;">
+                        <div style="font-size: 13px; font-weight: 700;">Corona Rey</div>
+                        <div style="font-size: 11px; color: var(--gold);">5,000 cred.</div>
+                    </div>
+                    <button class="casino-nav-btn buy-avatar-btn" data-avatar="crown" data-price="5000" style="padding: 6px 12px; font-size: 12px;">
+                        Comprar
+                    </button>
+                </div>
+
+                <div class="shop-item-card" style="margin-bottom: 0; padding: 12px;">
+                    <img src="assets/games/slots/diamond.svg" style="width: 32px; height: 32px;">
+                    <div style="flex-grow: 1; margin-left: 10px;">
+                        <div style="font-size: 13px; font-weight: 700;">Diamante</div>
+                        <div style="font-size: 11px; color: var(--gold);">5,000 cred.</div>
+                    </div>
+                    <button class="casino-nav-btn buy-avatar-btn" data-avatar="diamond" data-price="5000" style="padding: 6px 12px; font-size: 12px;">
+                        Comprar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Modal de notificaciones -->
-    <div class="modal" id="notificationsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-bell"></i> Notificaciones</h3>
-                <button class="close-modal" id="closeNotifications">&times;</button>
+    <!-- Modal de Notificaciones -->
+    <div class="casino-modal-backdrop" id="notificationsModal">
+        <div class="casino-modal-box">
+            <div class="casino-modal-header">
+                <h3 style="color: #fff; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-bell" style="color: var(--gold);"></i> Centro de Avisos
+                </h3>
+                <button class="modal-close-btn" id="closeNotifications">&times;</button>
             </div>
-            <div id="notificationsList">
-                <div class="notification-item unread">
-                    <strong>Bienvenido al Casino</strong>
-                    <p>¡Disfruta de 1000 créditos de bonificación!</p>
-                    <small>Hace unos momentos</small>
-                </div>
-                <div class="notification-item">
-                    <strong>Torneo de Blackjack</strong>
-                    <p>Únete al torneo semanal y gana hasta 50000 créditos</p>
-                    <small>Hace 2 días</small>
-                </div>
-                <div class="notification-item">
-                    <strong>Nuevo juego disponible</strong>
-                    <p>Prueba nuestro nuevo juego: Ruleta Europea</p>
-                    <small>Hace 5 días</small>
+            <div>
+                <div class="shop-item-card">
+                    <div>
+                        <h4 style="color: var(--gold);">👑 Versión Pro con Assets Vectoriales</h4>
+                        <p>Hemos reemplazado los emojis por gráficos vectoriales e implementado una dificultad justa y balanceada.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Variables globales
-        let currentUser = null;
-
-        // Crear partículas animadas mejoradas
-        function createParticles() {
-            const particles = document.getElementById('particles');
-            const colors = ['#ffd700', '#ff6b35', '#f7931e', '#fff', '#ff4757', '#2ed573'];
-            
-            for (let i = 0; i < 80; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                
-                // Posición aleatoria
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                
-                // Tamaño aleatorio
-                const size = Math.random() * 5 + 2;
-                particle.style.width = particle.style.height = size + 'px';
-                
-                // Color aleatorio
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
-                // Animación única para cada partícula
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 3) + 's';
-                
-                particles.appendChild(particle);
-            }
-        }
-
-        // Función para mostrar mensajes con animación
-        function showMessage(msg, type = 'error') {
-            const messageEl = document.getElementById("message");
-            messageEl.innerText = msg;
-            messageEl.style.color = type === 'error' ? '#ff4757' : '#2ed573';
-            messageEl.classList.remove('message-show');
-            setTimeout(() => messageEl.classList.add('message-show'), 10);
-            setTimeout(() => messageEl.classList.remove('message-show'), 4000);
-        }
-
-        // Función para mostrar el menú con animación
-        function showMenu() {
-            const loginDiv = document.getElementById("login-register");
-            const menuDiv = document.getElementById("menu");
-            
-            loginDiv.style.animation = 'fadeOut 0.5s ease-out forwards';
-            setTimeout(() => {
-                loginDiv.style.display = "none";
-                menuDiv.style.display = "block";
-                menuDiv.style.animation = 'slideUp 0.8s ease-out';
-            }, 500);
-            
-            // Actualizar información del usuario
-            document.getElementById("displayUser").innerText = currentUser;
-            updateUserData();
-        }
-
-        // Función para actualizar datos del usuario
-        function updateUserData() {
-            const users = JSON.parse(localStorage.getItem("users")) || {};
-            if (currentUser && users[currentUser]) {
-                const userData = users[currentUser];
-                
-                // Actualizar saldo con animación
-                const saldoEl = document.getElementById("displaySaldo");
-                const newSaldo = userData.saldo;
-                const currentSaldo = parseInt(saldoEl.innerText) || 0;
-                
-                // Animación de contador
-                const increment = (newSaldo - currentSaldo) / 30;
-                let current = currentSaldo;
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    if ((increment > 0 && current >= newSaldo) || 
-                        (increment < 0 && current <= newSaldo)) {
-                        current = newSaldo;
-                        clearInterval(timer);
-                    }
-                    saldoEl.innerText = Math.floor(current);
-                }, 30);
-                
-                // Actualizar otros datos de usuario (nivel, XP, fichas)
-                document.getElementById("userLevel").innerText = userData.level || 1;
-                document.getElementById("userXP").innerText = userData.xp || 0;
-                document.getElementById("userCoins").innerText = userData.coins || 0;
-            }
-        }
-
-        // Función para alternar entre modos claro/oscuro
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const themeIcon = document.querySelector('#themeToggle i');
-            
-            if (document.body.classList.contains('light-mode')) {
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-                localStorage.setItem('theme', 'light');
-            } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // Función para mostrar/ocultar notificaciones
-        function toggleNotifications() {
-            const modal = document.getElementById('notificationsModal');
-            if (modal.style.display === 'flex') {
-                modal.style.display = 'none';
-                document.getElementById('notificationDot').style.display = 'none';
-            } else {
-                modal.style.display = 'flex';
-            }
-        }
-
-        // Event Listeners
-        document.getElementById("loginBtn").addEventListener("click", () => {
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const users = JSON.parse(localStorage.getItem("users")) || {};
-            
-            if (users[username] && users[username].password === password) {
-                currentUser = username;
-                localStorage.setItem("currentUser", currentUser);
-                showMessage("¡Bienvenido! 🎉", 'success');
-                setTimeout(() => showMenu(), 1000);
-            } else {
-                showMessage("❌ Usuario o contraseña incorrectos");
-            }
-        });
-
-        document.getElementById("registerBtn").addEventListener("click", () => {
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
-            
-            if (!username || !password) {
-                showMessage("❌ Completa todos los campos");
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem("users")) || {};
-            if (users[username]) {
-                showMessage("❌ Usuario ya existe");
-                return;
-            }
-            
-            // Crear usuario con datos adicionales
-            users[username] = { 
-                password: password, 
-                saldo: 10000,
-                level: 1,
-                xp: 0,
-                coins: 100,
-                joined: new Date().toISOString()
-            };
-            
-            localStorage.setItem("users", JSON.stringify(users));
-            showMessage("✅ ¡Usuario registrado! Ahora haz login");
-        });
-
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-            currentUser = null;
-            localStorage.removeItem("currentUser");
-            
-            const menuDiv = document.getElementById("menu");
-            const loginDiv = document.getElementById("login-register");
-            
-            menuDiv.style.animation = 'fadeOut 0.5s ease-out forwards';
-            setTimeout(() => {
-                menuDiv.style.display = "none";
-                loginDiv.style.display = "block";
-                loginDiv.style.animation = 'fadeIn 1s ease-out';
-                // Limpiar campos
-                document.getElementById("username").value = '';
-                document.getElementById("password").value = '';
-            }, 500);
-        });
-
-        document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-        document.getElementById("notificationBell").addEventListener("click", toggleNotifications);
-        document.getElementById("closeNotifications").addEventListener("click", toggleNotifications);
-
-        // Cerrar modal al hacer clic fuera
-        window.addEventListener('click', (e) => {
-            const modal = document.getElementById('notificationsModal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Inicialización
-        window.onload = () => {
-            createParticles();
-            
-            // Cargar tema guardado
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
-                document.querySelector('#themeToggle i').classList.remove('fa-moon');
-                document.querySelector('#themeToggle i').classList.add('fa-sun');
-            }
-            
-            // Verificar si hay un usuario logueado
-            const storedUser = localStorage.getItem("currentUser");
-            if (storedUser) {
-                currentUser = storedUser;
-                showMenu();
-            }
-        };
-
-        // CSS adicional para animaciones
-        const additionalStyles = document.createElement('style');
-        additionalStyles.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; transform: scale(1); }
-                to { opacity: 0; transform: scale(0.9); }
-            }
-        `;
-        document.head.appendChild(additionalStyles);
-    </script>
+    <!-- Scripts -->
+    <script src="shared/casino-engine.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>

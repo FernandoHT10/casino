@@ -3,638 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐔 Chicken Road 🐔</title>
+    <title>Chicken Road - Casino AC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../shared/casino-shared.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(to bottom, #87ceeb 0%, #98d4f0 30%, #2e8b57 70%, #1e5f3f 100%); 
-            background-size: 100% 200%;
-            animation: skyAnimation 15s ease-in-out infinite alternate;
-            color: #fff; 
-            text-align: center; 
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow-x: hidden;
+        .chicken-wrapper {
+            max-width: 850px;
+            margin: 20px auto 50px;
+            padding: 0 15px;
         }
 
-        @keyframes skyAnimation {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 0% 100%; }
-        }
-
-        /* Clouds animation */
-        .clouds {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50px;
-            animation: driftClouds linear infinite;
-        }
-
-        @keyframes driftClouds {
-            from { transform: translateX(-200px); }
-            to { transform: translateX(calc(100vw + 200px)); }
-        }
-
-        .container { 
-            max-width: 900px; 
-            margin: 0 auto; 
-            width: 100%; 
-            position: relative; 
-            z-index: 10;
-        }
-
-        h2 { 
-            font-size: 3.5rem; 
-            margin-bottom: 20px; 
-            background: linear-gradient(45deg, #ffeb3b, #ff9800, #f44336);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease infinite;
-            text-shadow: 0 0 30px rgba(255, 235, 59, 0.8);
-            filter: drop-shadow(0 0 20px rgba(255, 235, 59, 0.5));
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .balance { 
-            font-size: 1.8rem; 
-            margin-bottom: 20px; 
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            padding: 15px 30px; 
-            border-radius: 20px; 
-            display: inline-block;
-            border: 2px solid rgba(255, 235, 59, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .controls { 
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            padding: 25px; 
-            border-radius: 20px; 
-            margin-bottom: 25px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            flex-wrap: wrap;
-        }
-
-        input { 
-            padding: 15px 25px; 
-            font-size: 16px; 
-            border-radius: 12px; 
-            border: none; 
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            min-width: 180px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(255, 235, 59, 0.5);
-            outline: none;
-        }
-
-        button {
-            padding: 15px 25px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            border-radius: 12px; 
-            border: none;
-            color: white; 
-            transition: all 0.3s ease;
-            font-weight: bold;
-            border-bottom: 4px solid;
-            position: relative;
-            overflow: hidden;
-            min-width: 160px;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s ease;
-        }
-
-        button:hover:not(:disabled)::before {
-            left: 100%;
-        }
-
-        button:hover:not(:disabled) { 
-            transform: translateY(-3px) scale(1.05); 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        button:active:not(:disabled) { 
-            transform: translateY(-1px) scale(1.02); 
-        }
-
-        #startBtn { 
-            background: linear-gradient(145deg, #4CAF50, #388E3C); 
-            border-color: #2E7D32; 
-        }
-        #advanceBtn { 
-            background: linear-gradient(145deg, #ff9800, #F57C00); 
-            border-color: #E65100; 
-        }
-        #cashoutBtn { 
-            background: linear-gradient(145deg, #2196F3, #1976D2); 
-            border-color: #0D47A1; 
-        }
-
-        button:disabled { 
-            background: #666; 
-            cursor: not-allowed; 
-            opacity: 0.5;
-            transform: none;
-        }
-        
-        .game-area {
-            width: 100%; 
-            max-width: 450px; 
-            margin: 25px auto;
-            background: linear-gradient(135deg, #6b6b6b, #555);
-            padding: 15px; 
-            border-radius: 20px;
-            border: 6px solid #4d4d4d;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .game-area::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #ffeb3b, #ff9800, #f44336, #ffeb3b);
-            background-size: 400% 400%;
-            border-radius: 20px;
-            z-index: -1;
-            animation: borderGlow 4s ease infinite;
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .road { 
-            height: 450px; 
-            position: relative; 
-            overflow: hidden; 
-            background: linear-gradient(135deg, #555, #444);
-            border-radius: 10px;
-            box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .lane-marking {
-            position: absolute;
-            left: 0; right: 0;
-            height: 6px;
-            background: repeating-linear-gradient(
-                90deg, 
-                #fff, 
-                #fff 25px, 
-                transparent 25px, 
-                transparent 50px
-            );
-            animation: moveRoad 2.5s linear infinite;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes moveRoad {
-            from { background-position-x: 0; }
-            to { background-position-x: -50px; }
-        }
-
-        #chicken {
-            font-size: 35px; 
-            position: absolute;
-            bottom: 8px; 
-            left: calc(50% - 17px);
-            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-            z-index: 15;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-            animation: chickenBob 2s ease-in-out infinite;
-        }
-
-        @keyframes chickenBob {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
-        }
-
-        .car {
-            font-size: 32px;
-            position: absolute;
-            width: 35px;
-            height: 45px;
-            z-index: 10;
-            animation: drive linear infinite;
-            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-        }
-
-        @keyframes drive {
-            from { transform: translateX(-60px); }
-            to { transform: translateX(calc(100% + 60px)); }
-        }
-        
-        .multiplier-info { 
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            padding: 20px; 
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .multiplier-info h3 {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            color: #ffeb3b;
-        }
-
-        .multiplier-info p { 
-            font-size: 1.1rem; 
-            margin: 8px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        #notification {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(145deg, #ff4757, #c44569);
-            color: white;
-            padding: 20px 35px;
-            border-radius: 15px;
-            z-index: 1000;
-            font-weight: bold;
-            font-size: 1.1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            display: none;
-            animation: slideInNotification 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        #notification.success {
-            background: linear-gradient(145deg, #2ed573, #20bf6b);
-        }
-
-        @keyframes slideInNotification {
-            from { 
-                top: -100px; 
-                opacity: 0; 
-                transform: translateX(-50%) scale(0.8);
-            }
-            to { 
-                top: 30px; 
-                opacity: 1; 
-                transform: translateX(-50%) scale(1);
-            }
-        }
-
-        .back-link {
-            display: inline-block; 
-            margin-top: 25px; 
-            padding: 15px 30px; 
-            background: linear-gradient(145deg, #333, #555);
-            color: white; 
-            text-decoration: none; 
-            border-radius: 15px;
-            transition: all 0.3s ease;
-            border-bottom: 4px solid #222;
-            font-weight: bold;
-        }
-
-        .back-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .level-indicator {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: bold;
-            z-index: 20;
+        .chicken-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 25px;
+            align-items: start;
         }
 
         @media (max-width: 768px) {
-            h2 { font-size: 2.5rem; }
-            .controls { 
-                flex-direction: column; 
-                gap: 15px;
-                padding: 20px;
+            .chicken-layout {
+                grid-template-columns: 1fr;
             }
-            input, button { min-width: 200px; }
-            .game-area { max-width: 350px; }
-            .road { height: 400px; }
+        }
+
+        .highway-panel {
+            background: rgba(14, 16, 24, 0.85);
+            border: 1px solid var(--bg-card-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .highway-road {
+            height: 480px;
+            background: linear-gradient(to bottom, #232733 0%, #151821 100%);
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #32384a;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .road-lane-strip {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, #ffd700, #ffd700 20px, transparent 20px, transparent 40px);
+            opacity: 0.45;
+        }
+
+        #chickenContainer {
+            position: absolute;
+            left: calc(50% - 20px);
+            bottom: 10px;
+            width: 40px;
+            height: 40px;
+            z-index: 50;
+            transition: bottom 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+            user-select: none;
+        }
+
+        #chickenContainer img {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .car-obstacle {
+            position: absolute;
+            z-index: 20;
+            animation: carDrive linear infinite;
+        }
+
+        .car-obstacle img {
+            height: 38px;
+            width: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        @keyframes carDrive {
+            from { transform: translateX(-90px); }
+            to { transform: translateX(540px); }
+        }
+
+        .info-stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-stat-val {
+            font-weight: 800;
+            color: var(--gold);
         }
     </style>
 </head>
 <body>
-    <div class="clouds" id="clouds"></div>
-    <div id="notification"></div>
-    
-    <div class="container">
-        <h2>🐔 Chicken Road 🐔</h2>
-        <div class="balance">💰 Saldo: <span id="saldo"></span> créditos</div>
+    <div id="gameHeaderNav"></div>
 
-        <div class="controls">
-            <input type="number" id="apuesta" placeholder="💰 Ingresa tu apuesta" min="1">
-            <button id="startBtn">🐔 Empezar a Cruzar</button>
-            <button id="advanceBtn" disabled>➡️ Avanzar Carril</button>
-            <button id="cashoutBtn" disabled">💰 Retirar Ganancias</button>
-        </div>
+    <div class="chicken-wrapper">
+        <div class="chicken-layout">
+            <!-- Panel Lateral de Controles -->
+            <div class="casino-card">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">
+                        APUESTA
+                    </label>
+                    <div class="casino-bet-input-wrap" style="max-width: 100%;">
+                        <input type="number" id="apuesta" value="100" min="10">
+                    </div>
+                    <div class="casino-chips-container" id="chipSelector" style="margin-top: 10px;">
+                        <div class="casino-chip" data-amount="50">50</div>
+                        <div class="casino-chip active" data-amount="100">100</div>
+                        <div class="casino-chip" data-amount="250">250</div>
+                        <div class="casino-chip" data-amount="500">500</div>
+                    </div>
+                </div>
 
-        <div class="game-area">
-            <div class="level-indicator" id="levelIndicator">Nivel: 0/8</div>
-            <div class="road" id="road">
-                <div id="chicken">🐔</div>
+                <div class="info-stat-card">
+                    <span>Carril Actual</span>
+                    <span class="info-stat-val" id="laneIndex">0 / 8</span>
+                </div>
+                <div class="info-stat-card">
+                    <span>Multiplicador</span>
+                    <span class="info-stat-val" id="multVal">1.00x</span>
+                </div>
+                <div class="info-stat-card">
+                    <span>Premio Acumulado</span>
+                    <span class="info-stat-val" id="accumulatedWinnings">0</span>
+                </div>
+                <div class="info-stat-card">
+                    <span>Riesgo de Choque</span>
+                    <span class="info-stat-val" id="nextRisk" style="color: #ff4757;">16%</span>
+                </div>
+
+                <button class="casino-btn casino-btn-primary" id="startBtn" style="width: 100%; margin-bottom: 10px;">
+                    <i class="fas fa-play"></i> Iniciar Cruce
+                </button>
+
+                <button class="casino-btn casino-btn-warning" id="advanceBtn" disabled style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff;">
+                    <i class="fas fa-forward"></i> Avanzar Carril
+                </button>
+
+                <button class="casino-btn casino-btn-success" id="cashoutBtn" disabled style="width: 100%;">
+                    <i class="fas fa-hand-holding-usd"></i> Retirar Ganancias
+                </button>
+            </div>
+
+            <!-- Carretera con Tráfico y Gallina Vectorial -->
+            <div class="highway-panel">
+                <div class="highway-road" id="road">
+                    <div id="chickenContainer">
+                        <img src="../assets/games/chicken/chicken.svg" id="chickenImg">
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="multiplier-info">
-            <h3>🎯 Información del Juego</h3>
-            <p id="currentMultiplier">Multiplicador Actual: x1.0</p>
-            <p id="nextMultiplier">Próximo Multiplicador: x1.2</p>
-            <p id="winnings">Ganancia Potencial: 0 créditos</p>
-            <p id="riskInfo">Riesgo del Próximo Carril: 10%</p>
-        </div>
-        
-        <a href="../index.html" class="back-link">🏠 Volver al Menú</a>
     </div>
 
+    <!-- Scripts -->
+    <script src="../shared/casino-engine.js"></script>
     <script>
-        // Create floating clouds
-        function createClouds() {
-            const cloudsContainer = document.getElementById('clouds');
-            for (let i = 0; i < 8; i++) {
-                const cloud = document.createElement('div');
-                cloud.classList.add('cloud');
-                cloud.style.width = Math.random() * 80 + 60 + 'px';
-                cloud.style.height = Math.random() * 30 + 20 + 'px';
-                cloud.style.top = Math.random() * 40 + 10 + '%';
-                cloud.style.animationDuration = (Math.random() * 20 + 15) + 's';
-                cloud.style.animationDelay = Math.random() * 10 + 's';
-                cloud.style.opacity = Math.random() * 0.5 + 0.3;
-                
-                // Add smaller cloud parts
-                cloud.innerHTML = `
-                    <div style="position: absolute; top: -10px; left: 10px; width: 30px; height: 30px; background: rgba(255,255,255,0.6); border-radius: 50%;"></div>
-                    <div style="position: absolute; top: -5px; right: 15px; width: 20px; height: 20px; background: rgba(255,255,255,0.4); border-radius: 50%;"></div>
-                `;
-                
-                cloudsContainer.appendChild(cloud);
+        casino.requireAuth();
+        casino.renderHeader('gameHeaderNav', { title: 'Chicken Road', backUrl: '../index.html' });
+        casino.setupChips('#chipSelector', '#apuesta');
+
+        // Riesgo real escalado (Sin victorias regaladas)
+        const multipliers = [1.20, 1.50, 2.00, 2.80, 4.00, 6.50, 11.00, 20.00];
+        const riskRates =   [0.16, 0.20, 0.24, 0.29, 0.34, 0.39, 0.44, 0.50];
+        const carAssets = ['car_red.svg', 'car_blue.svg', 'truck.svg'];
+
+        let currentBet = 0;
+        let currentLane = 0;
+        let isGameActive = false;
+        let isHopping = false;
+        let trafficInterval = null;
+
+        const startBtn = document.getElementById('startBtn');
+        const advanceBtn = document.getElementById('advanceBtn');
+        const cashoutBtn = document.getElementById('cashoutBtn');
+        const apuestaInput = document.getElementById('apuesta');
+        const chickenContainer = document.getElementById('chickenContainer');
+        const chickenImg = document.getElementById('chickenImg');
+        const road = document.getElementById('road');
+
+        const laneIndexEl = document.getElementById('laneIndex');
+        const multValEl = document.getElementById('multVal');
+        const accumulatedWinningsEl = document.getElementById('accumulatedWinnings');
+        const nextRiskEl = document.getElementById('nextRisk');
+
+        function buildLanes() {
+            road.innerHTML = `
+                <div id="chickenContainer">
+                    <img src="../assets/games/chicken/chicken.svg" id="chickenImg">
+                </div>
+            `;
+            for (let i = 1; i <= 8; i++) {
+                const strip = document.createElement('div');
+                strip.className = 'road-lane-strip';
+                strip.style.bottom = `${i * 54}px`;
+                road.appendChild(strip);
             }
         }
 
-        const users = JSON.parse(localStorage.getItem("users")) || {};
-        let currentUser = localStorage.getItem("currentUser");
-
-        const saldoEl = document.getElementById("saldo");
-        const startBtn = document.getElementById("startBtn");
-        const advanceBtn = document.getElementById("advanceBtn");
-        const cashoutBtn = document.getElementById("cashoutBtn");
-        const chicken = document.getElementById("chicken");
-        const road = document.getElementById("road");
-        const notificationEl = document.getElementById("notification");
-        const levelIndicator = document.getElementById("levelIndicator");
-
-        const multipliers = [1.2, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0, 20.0];
-        const riskPerLane = [0.1, 0.12, 0.15, 0.18, 0.22, 0.26, 0.30, 0.35];
-        const cars = ['🚗', '🚕', '🚙', '🚌', '🚎', '🚓', '🚑', '🚒', '🚚', '🚛', '🏎️', '🚐'];
-        
-        let gameState = { active: false, bet: 0, level: 0, currentMultiplier: 1.0 };
-        let carInterval;
-
-        function showNotification(message, isSuccess = false) {
-            notificationEl.textContent = message;
-            notificationEl.className = isSuccess ? 'success' : '';
-            notificationEl.style.display = 'block';
-            setTimeout(() => {
-                notificationEl.style.display = 'none';
-            }, 4000);
-        }
-
-        function updateSaldo() {
-            if (users[currentUser]) {
-                const saldo = Math.floor(users[currentUser].saldo);
-                saldoEl.innerText = saldo.toLocaleString();
-            }
-        }
-        
-        function setupRoad() {
-            road.innerHTML = '<div id="chicken">🐔</div>';
-            
-            for (let i = 0; i < multipliers.length; i++) {
-                const marking = document.createElement('div');
-                marking.className = 'lane-marking';
-                marking.style.bottom = `${(i + 1) * 55 - 3}px`;
-                marking.style.opacity = i < 4 ? '0.9' : '0.7'; // Dimmer for higher levels
-                road.appendChild(marking);
-            }
-        }
-
-        function spawnCars() {
-            if (carInterval) clearInterval(carInterval);
-            
-            carInterval = setInterval(() => {
-                if (!gameState.active) return;
-                
+        // Tráfico de vehículos más dinámico
+        function startTraffic() {
+            if (trafficInterval) clearInterval(trafficInterval);
+            trafficInterval = setInterval(() => {
+                if (!isGameActive) return;
                 const car = document.createElement('div');
-                car.className = 'car';
-                car.innerText = cars[Math.floor(Math.random() * cars.length)];
+                car.className = 'car-obstacle';
+                const asset = carAssets[Math.floor(Math.random() * carAssets.length)];
+                car.innerHTML = `<img src="../assets/games/chicken/${asset}">`;
                 
-                const lane = Math.floor(Math.random() * multipliers.length);
-                car.style.bottom = `${lane * 55 + 8}px`;
-                car.style.animationDuration = `${Math.random() * 2 + 2.5}s`;
-                car.style.animationDelay = `${Math.random() * 1.5}s`;
-                
-                // Add some cars going the opposite direction
-                if (Math.random() < 0.3) {
-                    car.style.transform = 'scaleX(-1)';
-                    car.style.animationName = 'driveReverse';
-                }
-                
+                const randomLane = Math.floor(Math.random() * 8) + 1;
+                car.style.bottom = `${randomLane * 54 - 40}px`;
+                car.style.animationDuration = `${Math.random() * 1.0 + 1.6}s`; // Más veloces
                 road.appendChild(car);
 
                 setTimeout(() => {
                     if (car.parentNode) car.remove();
-                }, 6000);
-            }, 400);
-        }
-
-        function updateUI() {
-            const currentMult = gameState.level === 0 ? 1.0 : multipliers[gameState.level - 1];
-            const nextMult = gameState.level < multipliers.length ? multipliers[gameState.level] : multipliers[multipliers.length - 1];
-            const risk = gameState.level < riskPerLane.length ? riskPerLane[gameState.level] : riskPerLane[riskPerLane.length - 1];
-            
-            document.getElementById('currentMultiplier').textContent = `Multiplicador Actual: x${currentMult.toFixed(2)}`;
-            document.getElementById('winnings').textContent = `Ganancia Potencial: ${Math.floor(gameState.bet * currentMult).toLocaleString()} créditos`;
-            levelIndicator.textContent = `Nivel: ${gameState.level}/8`;
-            
-            if (gameState.level < multipliers.length) {
-                document.getElementById('nextMultiplier').textContent = `Próximo Multiplicador: x${nextMult.toFixed(2)}`;
-                document.getElementById('riskInfo').textContent = `Riesgo del Próximo Carril: ${Math.round(risk * 100)}%`;
-            } else {
-                document.getElementById('nextMultiplier').textContent = '¡Has llegado al final!';
-                document.getElementById('riskInfo').textContent = 'Carretera completada';
-            }
-
-            chicken.style.transform = `translateY(-${gameState.level * 55}px)`;
-            
-            // Update chicken animation based on level
-            if (gameState.level >= 4) {
-                chicken.style.animation = 'chickenBob 1s ease-in-out infinite';
-            } else {
-                chicken.style.animation = 'chickenBob 2s ease-in-out infinite';
-            }
-        }
-
-        startBtn.addEventListener("click", () => {
-            const apuesta = parseInt(document.getElementById("apuesta").value);
-            if (!apuesta || apuesta <= 0 || apuesta > users[currentUser].saldo) {
-                showNotification("❌ Apuesta inválida. Revisa tu saldo.");
-                return;
-            }
-            
-            users[currentUser].saldo -= apuesta;
-            localStorage.setItem("users", JSON.stringify(users));
-            updateSaldo();
-
-            gameState = { active: true, bet: apuesta, level: 0, currentMultiplier: 1.0 };
-            startBtn.disabled = true;
-            advanceBtn.disabled = false;
-            cashoutBtn.disabled = true;
-            
-            spawnCars();
-            updateUI();
-            showNotification("🐔 ¡La gallina está lista para cruzar!", true);
-        });
-
-        advanceBtn.addEventListener("click", () => {
-            if (!gameState.active || gameState.level >= multipliers.length) return;
-
-            // Add suspense animation
-            chicken.style.animation = 'none';
-            chicken.style.transform += ' scale(1.2)';
-            
-            setTimeout(() => {
-                if (Math.random() < riskPerLane[gameState.level]) {
-                    chicken.innerText = '💥';
-                    chicken.style.transform += ' rotate(360deg)';
-                    showNotification('💥 ¡Oh no! La gallina fue atropellada. Has perdido tu apuesta.');
-                    resetGame();
-                } else {
-                    gameState.level++;
-                    gameState.currentMultiplier = multipliers[gameState.level - 1];
-                    updateUI();
-                    cashoutBtn.disabled = false;
-                    
-                    if (gameState.level >= multipliers.length) {
-                        showNotification('🏆 ¡INCREÍBLE! ¡Has cruzado toda la carretera! Auto-retirando ganancias...', true);
-                        setTimeout(() => cashOut(), 2000);
-                    } else {
-                        showNotification(`✅ ¡Carril cruzado! Multiplicador: x${gameState.currentMultiplier.toFixed(2)}`, true);
-                    }
-                }
-            }, 1000);
-        });
-
-        cashoutBtn.addEventListener("click", cashOut);
-
-        function cashOut() {
-            if (!gameState.active) return;
-            
-            const currentMult = gameState.level === 0 ? 1.0 : multipliers[gameState.level - 1];
-            const winnings = Math.floor(gameState.bet * currentMult);
-            
-            users[currentUser].saldo += winnings;
-            localStorage.setItem("users", JSON.stringify(users));
-            updateSaldo();
-            
-            showNotification(`🎉 ¡Felicidades! Has retirado ${winnings.toLocaleString()} créditos.`, true);
-            resetGame();
-        }
-
-        function resetGame() {
-            gameState.active = false;
-            if (carInterval) clearInterval(carInterval);
-            
-            chicken.innerText = '🐔';
-            chicken.style.animation = 'chickenBob 2s ease-in-out infinite';
-            chicken.style.transform = 'translateY(0px) scale(1) rotate(0deg)';
-            
-            startBtn.disabled = false;
-            advanceBtn.disabled = true;
-            cashoutBtn.disabled = true;
-            
-            gameState.currentMultiplier = 1.0;
-            gameState.level = 0;
-            
-            setTimeout(() => {
-                updateUI();
+                }, 3500);
             }, 500);
         }
 
-        // Add reverse animation for cars
-        const additionalStyles = document.createElement('style');
-        additionalStyles.textContent = `
-            @keyframes driveReverse {
-                from { transform: scaleX(-1) translateX(60px); }
-                to { transform: scaleX(-1) translateX(calc(-100% - 60px)); }
+        function updateStatsUI() {
+            laneIndexEl.innerText = `${currentLane} / 8`;
+            const mult = currentLane > 0 ? multipliers[currentLane - 1] : 1.0;
+            multValEl.innerText = `${mult.toFixed(2)}x`;
+            const win = Math.floor(currentBet * mult);
+            accumulatedWinningsEl.innerText = win.toLocaleString();
+
+            if (currentLane < 8) {
+                nextRiskEl.innerText = `${Math.round(riskRates[currentLane] * 100)}%`;
+            } else {
+                nextRiskEl.innerText = '¡Meta lograda!';
             }
-        `;
-        document.head.appendChild(additionalStyles);
-        
-        // Initial setup
-        createClouds();
-        updateSaldo();
-        setupRoad();
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (isGameActive) return;
+
+            const bet = parseInt(apuestaInput.value);
+            if (!casino.deductBet(bet)) return;
+
+            currentBet = bet;
+            currentLane = 0;
+            isGameActive = true;
+            isHopping = false;
+
+            buildLanes();
+            const ch = document.getElementById('chickenContainer');
+            const img = document.getElementById('chickenImg');
+            ch.style.bottom = '10px';
+            img.src = '../assets/games/chicken/chicken.svg';
+            img.style.transform = 'scale(1)';
+
+            startBtn.disabled = true;
+            advanceBtn.disabled = false;
+            cashoutBtn.disabled = true;
+            apuestaInput.disabled = true;
+
+            startTraffic();
+            updateStatsUI();
+            casino.showToast('¡La gallina inicia su camino! Cuidado con el tráfico.', 'info');
+        });
+
+        advanceBtn.addEventListener('click', () => {
+            if (!isGameActive || isHopping || currentLane >= 8) return;
+
+            // Bloquear clics durante el salto
+            isHopping = true;
+            advanceBtn.disabled = true;
+            cashoutBtn.disabled = true;
+
+            const ch = document.getElementById('chickenContainer');
+            const img = document.getElementById('chickenImg');
+            casino.playSound('chip');
+
+            setTimeout(() => {
+                const risk = riskRates[currentLane];
+                const hit = Math.random() < risk;
+
+                if (hit) {
+                    // Atropellada
+                    img.src = '../assets/games/mines/mine.svg';
+                    img.style.transform = 'rotate(180deg) scale(1.2)';
+                    casino.playSound('explosion');
+                    casino.recordLoss(currentBet);
+                    casino.showToast('¡Oh no! Un vehículo chocó a la gallina. Apuesta perdida.', 'error');
+                    endGame();
+                } else {
+                    // Cruce Exitoso
+                    currentLane++;
+                    ch.style.bottom = `${currentLane * 54 + 10}px`;
+                    casino.playSound('card');
+
+                    updateStatsUI();
+                    isHopping = false;
+
+                    if (currentLane >= 8) {
+                        casino.showToast('🏆 ¡INCREÍBLE! Cruzaste toda la carretera sana y salva.', 'win');
+                        setTimeout(cashOut, 1000);
+                    } else {
+                        advanceBtn.disabled = false;
+                        cashoutBtn.disabled = false;
+                    }
+                }
+            }, 550);
+        });
+
+        cashoutBtn.addEventListener('click', cashOut);
+
+        function cashOut() {
+            if (!isGameActive || currentLane === 0) return;
+            isGameActive = false;
+
+            const mult = multipliers[currentLane - 1];
+            const payout = Math.floor(currentBet * mult);
+            casino.addPayout(payout, mult, { showToast: true });
+
+            endGame();
+        }
+
+        function endGame() {
+            isGameActive = false;
+            isHopping = false;
+            if (trafficInterval) clearInterval(trafficInterval);
+
+            startBtn.disabled = false;
+            advanceBtn.disabled = true;
+            cashoutBtn.disabled = true;
+            apuestaInput.disabled = false;
+        }
+
+        buildLanes();
     </script>
 </body>
 </html>

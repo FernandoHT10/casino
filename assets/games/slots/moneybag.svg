@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="bagGrad" cx="40%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#785c37"/>
+      <stop offset="60%" stop-color="#543d22"/>
+      <stop offset="100%" stop-color="#2d1f0f"/>
+    </radialGradient>
+  </defs>
+  <path d="M40 32 L40 24 C40 20, 60 20, 60 24 L60 32" fill="#b8860b"/>
+  <path d="M36 34 C30 38, 18 55, 18 70 C18 85, 30 88, 50 88 C70 88, 82 85, 82 70 C82 55, 70 38, 64 34 Z" fill="url(#bagGrad)" stroke="#ffd700" stroke-width="2.5" filter="drop-shadow(0 6px 10px rgba(0,0,0,0.6))"/>
+  <circle cx="50" cy="62" r="16" fill="#ffd700"/>
+  <text x="50" y="70" font-family="Arial, sans-serif" font-size="22" font-weight="900" fill="#2d1f0f" text-anchor="middle">$</text>
+</svg>
