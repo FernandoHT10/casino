@@ -102,6 +102,14 @@ class CasinoEngine {
                 })
                 .subscribe();
 
+            // Suscribirse a comunicados oficiales en tiempo real
+            this.supabase
+                .channel('realtime_announcements')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => {
+                    this.handleRealtimeAnnouncement(payload);
+                })
+                .subscribe();
+
             // Sincronizar usuario actual si ya hay sesión activa
             this.fetchUserProfile();
         } catch (e) {
@@ -911,6 +919,152 @@ class CasinoEngine {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400);
         }, duration);
+    }
+
+    /* -------------------------------------------------------------
+       12. COMUNICADOS DE ADMINISTRACIÓN Y CENTRO DE AVISOS
+    ---------------------------------------------------------------- */
+    handleRealtimeAnnouncement(payload) {
+        if (!payload) return;
+        if (payload.eventType === 'INSERT' && payload.new) {
+            const dot = document.getElementById('notificationDot');
+            if (dot) dot.style.display = 'inline-block';
+            this.showToast(`Nuevo comunicado oficial: ${payload.new.title}`, 'info');
+            this.playSound('card');
+        }
+        window.dispatchEvent(new CustomEvent('casino:announcement_changed', { detail: payload }));
+    }
+
+    async getAnnouncements() {
+        const defaultNotices = [
+            {
+                id: 'default-welcome',
+                title: 'Bienvenido a Casino Royal AC',
+                content: 'Disfruta de nuestros juegos con probabilidades matemáticas transparentes, pagos instantáneos y bonos diarios. Si tienes dudas o sugerencias, comunícate con nuestro equipo.',
+                author: 'Dirección General',
+                badge: 'Novedad',
+                created_at: new Date(Date.now() - 3600000).toISOString()
+            }
+        ];
+
+        let notices = [];
+        if (this.supabase) {
+            try {
+                const { data, error } = await this.supabase
+                    .from('announcements')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false });
+
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    notices = data;
+                    localStorage.setItem('casino_announcements_cache', JSON.stringify(notices));
+                    return notices;
+                }
+            } catch (e) {
+                console.warn('[CasinoEngine] Supabase announcements fetch error:', e);
+            }
+        }
+
+        try {
+            const cached = localStorage.getItem('casino_announcements_cache');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            }
+        } catch (e) {}
+
+        return defaultNotices;
+    }
+
+    async createAnnouncement({ title, content, author = 'Administración', badge = 'Novedad' }) {
+        if (!title || !title.trim()) {
+            return { success: false, error: 'El título es obligatorio.' };
+        }
+        if (!content || !content.trim()) {
+            return { success: false, error: 'El contenido del comunicado es obligatorio.' };
+        }
+
+        const newNotice = {
+            title: title.trim(),
+            content: content.trim(),
+            author: (author || 'Administración').trim(),
+            badge: (badge || 'Novedad').trim(),
+            is_active: true,
+            created_at: new Date().toISOString()
+        };
+
+        if (this.supabase) {
+            try {
+                const { data, error } = await this.supabase
+                    .from('announcements')
+                    .insert([newNotice])
+                    .select()
+                    .single();
+
+                if (!error && data) {
+                    const list = await this.getAnnouncements();
+                    const updated = [data, ...list.filter(item => item.id !== data.id)];
+                    localStorage.setItem('casino_announcements_cache', JSON.stringify(updated));
+                    return { success: true, data };
+                } else if (error) {
+                    console.warn('[CasinoEngine] Error al insertar comunicado en Supabase:', error.message);
+                }
+            } catch (err) {
+                console.warn('[CasinoEngine] Excepción de red en Supabase:', err);
+            }
+        }
+
+        // Fallback local garantizado para pruebas inmediatas
+        const localNotice = {
+            ...newNotice,
+            id: 'local-' + Date.now() + '-' + Math.floor(Math.random() * 1000)
+        };
+        const list = await this.getAnnouncements();
+        const updated = [localNotice, ...list.filter(item => item.id !== localNotice.id)];
+        localStorage.setItem('casino_announcements_cache', JSON.stringify(updated));
+        return { success: true, data: localNotice, isLocal: true };
+    }
+
+    async deleteAnnouncement(id) {
+        if (!id) return { success: false, error: 'ID no válido.' };
+
+        if (this.supabase && !id.toString().startsWith('local-') && !id.toString().startsWith('default-')) {
+            try {
+                await this.supabase
+                    .from('announcements')
+                    .delete()
+                    .eq('id', id);
+            } catch (err) {
+                console.warn('[CasinoEngine] Error al eliminar de Supabase:', err);
+            }
+        }
+
+        try {
+            const list = await this.getAnnouncements();
+            const updated = list.filter(item => item.id !== id);
+            localStorage.setItem('casino_announcements_cache', JSON.stringify(updated));
+        } catch (e) {}
+
+        return { success: true };
+    }
+
+    hasUnreadAnnouncements(notices) {
+        if (!Array.isArray(notices) || notices.length === 0) return false;
+        const lastRead = Number(localStorage.getItem('casino_last_viewed_announcement_ts') || 0);
+        const newest = new Date(notices[0].created_at || Date.now()).getTime();
+        return newest > lastRead;
+    }
+
+    markAnnouncementsAsRead(notices) {
+        const newest = notices && notices.length > 0 
+            ? new Date(notices[0].created_at || Date.now()).getTime() 
+            : Date.now();
+        localStorage.setItem('casino_last_viewed_announcement_ts', newest.toString());
+        const dot = document.getElementById('notificationDot');
+        if (dot) dot.style.display = 'none';
     }
 }
 

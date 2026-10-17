@@ -77,6 +77,33 @@ create trigger on_auth_user_created
 -- 6. Habilitar sincronización en tiempo real (opcional para multi-pestaña)
 alter publication supabase_realtime add table public.profiles;
 
+-- 7. Crear tabla de comunicados de administración (Centro de Avisos)
+create table if not exists public.announcements (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    content text not null,
+    author text not null default 'Administración',
+    badge text not null default 'Novedad',
+    is_active boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+alter table public.announcements enable row level security;
+
+drop policy if exists "Lectura pública de avisos" on public.announcements;
+create policy "Lectura pública de avisos" on public.announcements for select using (is_active = true);
+
+drop policy if exists "Crear avisos" on public.announcements;
+create policy "Crear avisos" on public.announcements for insert with check (true);
+
+drop policy if exists "Modificar avisos" on public.announcements;
+create policy "Modificar avisos" on public.announcements for update using (true);
+
+drop policy if exists "Eliminar avisos" on public.announcements;
+create policy "Eliminar avisos" on public.announcements for delete using (true);
+
+alter publication supabase_realtime add table public.announcements;
+
 -- ============================================================================
 -- FIN DEL ESQUEMA
 -- ============================================================================

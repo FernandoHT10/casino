@@ -20,9 +20,9 @@
                 <span class="brand-title">CASINO ROYAL AC</span>
             </div>
             <div>
-                <button class="casino-nav-btn" id="notificationBell" title="Notificaciones">
+                <button class="casino-nav-btn" id="notificationBell" title="Centro de Avisos" style="position: relative; padding: 10px 14px;">
                     <i class="fas fa-bell"></i>
-                    <span id="notificationDot" style="width: 8px; height: 8px; background: #ff4757; border-radius: 50%; display: inline-block;"></span>
+                    <span id="notificationDot" class="pulsing-dot" style="width: 10px; height: 10px; background: #ff4757; border-radius: 50%; display: none; position: absolute; top: 6px; right: 8px;"></span>
                 </button>
             </div>
         </header>
@@ -240,21 +240,92 @@
         </div>
     </div>
 
-    <!-- Modal de Notificaciones -->
+    <!-- Modal de Notificaciones y Comunicados Oficiales -->
     <div class="casino-modal-backdrop" id="notificationsModal">
-        <div class="casino-modal-box">
+        <div class="casino-modal-box" style="max-width: 620px;">
             <div class="casino-modal-header">
-                <h3 style="color: #fff; display: flex; align-items: center; gap: 10px;">
+                <h3 style="color: #fff; display: flex; align-items: center; gap: 10px; font-size: 1.25rem; margin: 0;">
                     <i class="fas fa-bell" style="color: var(--gold);"></i> Centro de Avisos
                 </h3>
-                <button class="modal-close-btn" id="closeNotifications">&times;</button>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="casino-nav-btn" id="adminNoticeToggleBtn" title="Acceso para redactar comunicados oficiales" style="padding: 6px 12px; font-size: 12px;">
+                        <i class="fas fa-shield-alt"></i> Panel Admin
+                    </button>
+                    <button class="modal-close-btn" id="closeNotifications">&times;</button>
+                </div>
             </div>
-            <div>
-                <div class="shop-item-card">
-                    <div>
-                        <h4 style="color: var(--gold);"><i class="fas fa-bullhorn" style="margin-right: 6px;"></i> Novedades del Casino</h4>
-                        <p>Mejoramos el rendimiento, los efectos de sonido y la fluidez en todos los juegos para darte una experiencia limpia y rápida.</p>
+
+            <!-- Caja de Acceso Administrador (PIN) -->
+            <div id="adminNoticePinBox" class="notice-admin-composer" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="color: var(--gold); margin: 0; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-lock"></i> Acceso a Redacción de Avisos
+                    </h4>
+                    <button id="cancelAdminPinBtn" class="modal-close-btn" style="font-size: 1.1rem; line-height: 1;">&times;</button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px;">
+                    Introduce la clave de administración para redactar o eliminar comunicados visibles para todos los jugadores.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="password" id="adminNoticePinInput" class="notice-input" placeholder="Clave de administración (admin777)">
+                    <button id="submitAdminPinBtn" class="casino-btn casino-btn-primary" style="padding: 10px 18px; white-space: nowrap;">
+                        <i class="fas fa-key"></i> Entrar
+                    </button>
+                </div>
+                <div id="adminPinError" style="color: #ff4757; font-size: 0.8rem; margin-top: 8px; display: none;"></div>
+            </div>
+
+            <!-- Panel de Composición de Comunicados (Admin) -->
+            <div id="adminNoticeComposerBox" class="notice-admin-composer" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 8px; height: 8px; background: #2ed573; border-radius: 50%;"></span>
+                        <span style="color: var(--gold); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Modo Administrador Activo
+                        </span>
                     </div>
+                    <button id="exitAdminNoticeBtn" class="casino-nav-btn" style="padding: 4px 10px; font-size: 11px;">
+                        <i class="fas fa-sign-out-alt"></i> Salir de Admin
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Título del Comunicado</label>
+                    <input type="text" id="newNoticeTitle" class="notice-input" placeholder="Ej: Torneo especial de fin de semana">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Categoría</label>
+                        <select id="newNoticeBadge" class="notice-select">
+                            <option value="Novedad">Novedad</option>
+                            <option value="Promoción">Promoción</option>
+                            <option value="Importante">Importante</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Emisor / Firma</label>
+                        <input type="text" id="newNoticeAuthor" class="notice-input" value="Administración" placeholder="Ej: Dirección General">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Contenido del Mensaje</label>
+                    <textarea id="newNoticeContent" class="notice-textarea" rows="3" placeholder="Escribe el mensaje oficial que verán todos los jugadores..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="publishNoticeBtn" class="casino-btn casino-btn-primary" style="flex: 1; justify-content: center; padding: 11px;">
+                        <i class="fas fa-paper-plane"></i> Publicar Comunicado
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feed de Comunicados -->
+            <div id="announcementsFeed" style="max-height: 400px; overflow-y: auto; padding-right: 4px;">
+                <div style="text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 0.9rem;">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Cargando comunicados...
                 </div>
             </div>
         </div>
