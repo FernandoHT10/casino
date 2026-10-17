@@ -8,92 +8,278 @@
     <link rel="stylesheet" href="../shared/casino-shared.css">
     <style>
         .chicken-wrapper {
-            max-width: 850px;
+            max-width: 960px;
             margin: 20px auto 50px;
             padding: 0 15px;
         }
 
         .chicken-layout {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 310px 1fr;
             gap: 25px;
             align-items: start;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
             .chicken-layout {
                 grid-template-columns: 1fr;
             }
         }
 
+        /* Carretera Estilo Casino Real (InOut / Mystake) */
         .highway-panel {
-            background: rgba(14, 16, 24, 0.85);
-            border: 1px solid var(--bg-card-border);
+            background: radial-gradient(circle at 50% 10%, rgba(25, 30, 45, 0.95), rgba(10, 12, 18, 0.98));
+            border: 2px solid rgba(255, 215, 0, 0.2);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 16px;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
 
         .highway-road {
-            height: 480px;
-            background: linear-gradient(to bottom, #232733 0%, #151821 100%);
-            border-radius: 14px;
+            height: 570px;
+            background: #1b1e28;
+            border-radius: 12px;
             position: relative;
             overflow: hidden;
-            border: 4px solid #32384a;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+            border: 3px solid #2d3345;
+            box-shadow: inset 0 0 35px rgba(0,0,0,0.9);
         }
 
-        .road-lane-strip {
+        /* Zona de Meta Superior */
+        .road-finish-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: repeating-linear-gradient(45deg, #111, #111 12px, #fff 12px, #fff 24px);
+            border-bottom: 3px solid #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .road-finish-banner {
+            background: linear-gradient(135deg, #ffd700, #ff9f1a);
+            color: #000;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 4px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Zona de Salida Inferior */
+        .road-start-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 42px;
+            background: linear-gradient(to top, #1e392a, #274d37);
+            border-top: 3px solid #2ed573;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .road-start-text {
+            color: #2ed573;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Carriles individuales */
+        .road-lane {
             position: absolute;
             left: 0;
             right: 0;
-            height: 4px;
-            background: repeating-linear-gradient(90deg, #ffd700, #ffd700 20px, transparent 20px, transparent 40px);
-            opacity: 0.45;
+            height: 60px;
+            border-bottom: 2px dashed rgba(255, 215, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            pointer-events: none;
         }
 
+        .road-lane.passed {
+            background: rgba(46, 213, 115, 0.08);
+            border-bottom-color: rgba(46, 213, 115, 0.4);
+        }
+
+        .road-lane.current {
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.22), transparent 75%);
+            border-bottom-color: rgba(255, 215, 0, 0.8);
+            box-shadow: inset 0 0 25px rgba(255, 215, 0, 0.15);
+        }
+
+        .road-lane.next {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .lane-badge {
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            z-index: 15;
+        }
+
+        .road-lane.passed .lane-badge {
+            background: rgba(46, 213, 115, 0.25);
+            border-color: #2ed573;
+            color: #2ed573;
+        }
+
+        .road-lane.current .lane-badge {
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            border-color: #fff;
+            color: #000;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+            transform: scale(1.08);
+        }
+
+        .lane-multiplier-tag {
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        /* Gallina 3D Real */
         #chickenContainer {
             position: absolute;
-            left: calc(50% - 20px);
-            bottom: 10px;
-            width: 40px;
-            height: 40px;
-            z-index: 50;
-            transition: bottom 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+            left: calc(50% - 28px);
+            bottom: 6px;
+            width: 56px;
+            height: 56px;
+            z-index: 60;
+            transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
+            cursor: pointer;
+            filter: drop-shadow(0 8px 14px rgba(0,0,0,0.85));
         }
 
-        #chickenContainer img {
+        #chickenImg {
             width: 100%;
             height: 100%;
-            transition: transform 0.2s;
+            object-fit: contain;
+            animation: chickenIdle 2.5s ease-in-out infinite;
+            transform-origin: center bottom;
         }
 
+        /* Animación de salto realista con squash & stretch */
+        .chicken-hopping #chickenImg {
+            animation: chickenHop 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+
+        @keyframes chickenIdle {
+            0%, 100% { transform: translateY(0) scale(1, 1); }
+            50% { transform: translateY(-4px) scale(1.03, 0.97); }
+        }
+
+        @keyframes chickenHop {
+            0% { transform: scale(1, 1) translateY(0); }
+            30% { transform: scale(0.85, 1.25) translateY(-28px); }
+            70% { transform: scale(1.18, 0.82) translateY(0); }
+            100% { transform: scale(1, 1) translateY(0); }
+        }
+
+        /* Animación de choque / atropellada */
+        .chicken-crashed #chickenImg {
+            animation: chickenCrash 0.75s ease forwards !important;
+        }
+
+        @keyframes chickenCrash {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            35% { transform: scale(1.35) rotate(180deg) translateY(-25px); opacity: 0.95; filter: brightness(2) contrast(1.5); }
+            100% { transform: scale(0.3) rotate(720deg) translateY(50px); opacity: 0; }
+        }
+
+        /* Animación de victoria / retiro */
+        .chicken-victory #chickenImg {
+            animation: chickenVictory 0.6s ease infinite !important;
+        }
+
+        @keyframes chickenVictory {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.15) rotate(6deg); }
+        }
+
+        /* Partículas de plumas y chispas */
+        .feather-particle {
+            position: absolute;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 70;
+            animation: featherFly 0.8s ease-out forwards;
+        }
+
+        @keyframes featherFly {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.2); opacity: 0; }
+        }
+
+        /* Autos y Obstáculos en 2 Direcciones */
         .car-obstacle {
             position: absolute;
-            z-index: 20;
-            animation: carDrive linear infinite;
+            z-index: 25;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
         }
 
         .car-obstacle img {
-            height: 38px;
+            height: 36px;
             width: auto;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
         }
 
-        @keyframes carDrive {
-            from { transform: translateX(-90px); }
-            to { transform: translateX(540px); }
+        .car-obstacle.drive-right {
+            animation: carDriveRight linear infinite;
         }
 
+        .car-obstacle.drive-left {
+            animation: carDriveLeft linear infinite;
+        }
+
+        .car-obstacle.drive-left img {
+            transform: scaleX(-1);
+        }
+
+        @keyframes carDriveRight {
+            from { transform: translateX(-110px); }
+            to { transform: translateX(620px); }
+        }
+
+        @keyframes carDriveLeft {
+            from { transform: translateX(620px); }
+            to { transform: translateX(-110px); }
+        }
+
+        /* Panel de Información Lateral */
         .info-stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
             padding: 12px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
@@ -103,6 +289,47 @@
         .info-stat-val {
             font-weight: 800;
             color: var(--gold);
+            font-size: 15px;
+        }
+
+        /* Banner de Alerta / Celebración Flotante */
+        .highway-alert-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(14, 16, 24, 0.95);
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            padding: 20px 30px;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.85);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .highway-alert-banner.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .quick-bet-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-bet-btn:hover {
+            background: var(--gold);
+            color: #000;
         }
     </style>
 </head>
@@ -114,9 +341,16 @@
             <!-- Panel Lateral de Controles -->
             <div class="casino-card">
                 <div style="margin-bottom: 15px;">
-                    <label style="font-size: 13px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">
-                        APUESTA
-                    </label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-size: 13px; font-weight: 700; color: var(--text-muted);">
+                            APUESTA
+                        </label>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="quick-bet-btn" id="btnHalf">1/2</button>
+                            <button class="quick-bet-btn" id="btnDouble">2x</button>
+                            <button class="quick-bet-btn" id="btnMax">MAX</button>
+                        </div>
+                    </div>
                     <div class="casino-bet-input-wrap" style="max-width: 100%;">
                         <input type="number" id="apuesta" value="100" min="10">
                     </div>
@@ -125,11 +359,12 @@
                         <div class="casino-chip active" data-amount="100">100</div>
                         <div class="casino-chip" data-amount="250">250</div>
                         <div class="casino-chip" data-amount="500">500</div>
+                        <div class="casino-chip" data-amount="1000">1k</div>
                     </div>
                 </div>
 
                 <div class="info-stat-card">
-                    <span>Carril Actual</span>
+                    <span>Carril</span>
                     <span class="info-stat-val" id="laneIndex">0 / 8</span>
                 </div>
                 <div class="info-stat-card">
@@ -138,31 +373,55 @@
                 </div>
                 <div class="info-stat-card">
                     <span>Premio Acumulado</span>
-                    <span class="info-stat-val" id="accumulatedWinnings">0</span>
+                    <span class="info-stat-val" id="accumulatedWinnings" style="color: #2ed573;">0 cred.</span>
                 </div>
                 <div class="info-stat-card">
                     <span>Riesgo de Choque</span>
                     <span class="info-stat-val" id="nextRisk" style="color: #ff4757;">16%</span>
                 </div>
 
-                <button class="casino-btn casino-btn-primary" id="startBtn" style="width: 100%; margin-bottom: 10px;">
+                <!-- Botones Principales de Juego -->
+                <button class="casino-btn casino-btn-primary" id="startBtn" style="width: 100%; margin-bottom: 10px; padding: 14px; font-size: 15px;">
                     <i class="fas fa-play"></i> Iniciar Cruce
                 </button>
 
-                <button class="casino-btn casino-btn-warning" id="advanceBtn" disabled style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff;">
-                    <i class="fas fa-forward"></i> Avanzar Carril
+                <button class="casino-btn casino-btn-warning" id="advanceBtn" disabled style="width: 100%; margin-bottom: 10px; padding: 14px; font-size: 15px; background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff;">
+                    <i class="fas fa-forward"></i> Avanzar Carril (Espacio)
                 </button>
 
-                <button class="casino-btn casino-btn-success" id="cashoutBtn" disabled style="width: 100%;">
+                <button class="casino-btn casino-btn-success" id="cashoutBtn" disabled style="width: 100%; padding: 14px; font-size: 15px;">
                     <i class="fas fa-hand-holding-usd"></i> Retirar Ganancias
                 </button>
             </div>
 
-            <!-- Carretera con Tráfico y Gallina Vectorial -->
-            <div class="highway-panel">
+            <!-- Carretera Interactiva de Casino Real -->
+            <div class="highway-panel" id="highwayPanel">
                 <div class="highway-road" id="road">
+                    <!-- Meta Superior -->
+                    <div class="road-finish-line">
+                        <div class="road-finish-banner">
+                            <i class="fas fa-trophy"></i> META DE ORO • 23.46x
+                        </div>
+                    </div>
+
+                    <!-- Carriles Dinámicos 1 al 8 -->
+                    <div id="lanesContainer"></div>
+
+                    <!-- Gallina 3D Real Mascot -->
                     <div id="chickenContainer">
-                        <img src="../assets/games/chicken/chicken.svg" id="chickenImg">
+                        <img src="../assets/games/chicken/chicken_real.png" id="chickenImg" alt="Gallina Real Mascot">
+                    </div>
+
+                    <!-- Salida Inferior -->
+                    <div class="road-start-line">
+                        <span class="road-start-text">🚩 ZONA SEGURA DE SALIDA</span>
+                    </div>
+
+                    <!-- Banner de Alerta / Celebración -->
+                    <div class="highway-alert-banner" id="alertBanner">
+                        <div id="alertIcon" style="font-size: 40px; margin-bottom: 8px;">💥</div>
+                        <h3 id="alertTitle" style="color: #fff; margin-bottom: 4px; font-size: 18px;">¡Atropellada!</h3>
+                        <p id="alertDesc" style="color: var(--text-muted); font-size: 13px; margin: 0;">Perdiste la apuesta.</p>
                     </div>
                 </div>
             </div>
@@ -175,11 +434,10 @@
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
-        casino.renderHeader('gameHeaderNav', { title: 'Chicken Road', backUrl: '../index.html' });
+        casino.renderHeader('gameHeaderNav', { title: '🐔 Chicken Road', backUrl: '../index.html' });
         casino.setupChips('#chipSelector', '#apuesta');
 
-        // Multiplicadores calibrados con RTP exacto del 96%
-        // Formula: 0.96 / P_k donde P_k = acumulado de (1 - risk)
+        // Multiplicadores oficiales y riesgos (96% RTP exacto de Casino)
         const multipliers = [1.14, 1.42, 1.88, 2.64, 4.01, 6.57, 11.73, 23.46];
         const riskRates =   [0.16, 0.20, 0.24, 0.29, 0.34, 0.39, 0.44, 0.50];
         const carAssets = ['car_red.svg', 'car_blue.svg', 'truck.svg'];
@@ -200,44 +458,84 @@
         const chickenContainer = document.getElementById('chickenContainer');
         const chickenImg = document.getElementById('chickenImg');
         const road = document.getElementById('road');
+        const highwayPanel = document.getElementById('highwayPanel');
+        const lanesContainer = document.getElementById('lanesContainer');
+        const alertBanner = document.getElementById('alertBanner');
+        const alertIcon = document.getElementById('alertIcon');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertDesc = document.getElementById('alertDesc');
 
         const laneIndexEl = document.getElementById('laneIndex');
         const multValEl = document.getElementById('multVal');
         const accumulatedWinningsEl = document.getElementById('accumulatedWinnings');
         const nextRiskEl = document.getElementById('nextRisk');
 
+        // Configuración de botones rápidos de apuesta
+        document.getElementById('btnHalf')?.addEventListener('click', () => {
+            if (isGameActive) return;
+            apuestaInput.value = Math.max(10, Math.floor(Number(apuestaInput.value) / 2));
+            casino.playSound('click');
+        });
+        document.getElementById('btnDouble')?.addEventListener('click', () => {
+            if (isGameActive) return;
+            const currentSaldo = casino.getSaldo();
+            apuestaInput.value = Math.min(currentSaldo, Math.floor(Number(apuestaInput.value) * 2));
+            casino.playSound('click');
+        });
+        document.getElementById('btnMax')?.addEventListener('click', () => {
+            if (isGameActive) return;
+            apuestaInput.value = Math.max(10, casino.getSaldo());
+            casino.playSound('click');
+        });
+
+        // Construir los 8 carriles con sus multiplicadores
         function buildLanes() {
-            road.innerHTML = `
-                <div id="chickenContainer">
-                    <img src="../assets/games/chicken/chicken.svg" id="chickenImg">
-                </div>
-            `;
+            lanesContainer.innerHTML = '';
             for (let i = 1; i <= 8; i++) {
-                const strip = document.createElement('div');
-                strip.className = 'road-lane-strip';
-                strip.style.bottom = `${i * 54}px`;
-                road.appendChild(strip);
+                const lane = document.createElement('div');
+                lane.className = 'road-lane';
+                lane.id = `lane_${i}`;
+                // Posición calculada de abajo hacia arriba (42px base de salida + (i-1)*62px)
+                lane.style.bottom = `${42 + (i - 1) * 60}px`;
+
+                const mult = multipliers[i - 1];
+                const risk = Math.round(riskRates[i - 1] * 100);
+
+                lane.innerHTML = `
+                    <div class="lane-badge">
+                        Carril ${i}
+                    </div>
+                    <div class="lane-badge lane-multiplier-tag" style="color: ${i === 8 ? '#ffd700' : '#fff'};">
+                        ${mult.toFixed(2)}x <small style="font-size: 10px; opacity: 0.7;">(${risk}% riesgo)</small>
+                    </div>
+                `;
+                lanesContainer.appendChild(lane);
             }
         }
 
+        // Generar tráfico fluido en 2 sentidos
         function startTraffic() {
             if (trafficInterval) clearInterval(trafficInterval);
             trafficInterval = setInterval(() => {
                 if (!isGameActive) return;
-                const car = document.createElement('div');
-                car.className = 'car-obstacle';
-                const asset = carAssets[casino.randomInt(0, carAssets.length - 1)];
-                car.innerHTML = `<img src="../assets/games/chicken/${asset}">`;
-                
+
                 const randomLane = casino.randomInt(1, 8);
-                car.style.bottom = `${randomLane * 54 - 40}px`;
-                car.style.animationDuration = `${casino.randomFloat() * 1.0 + 1.6}s`;
+                // No generar auto en el carril exacto donde está la gallina justo ahora si no hubo choque
+                const car = document.createElement('div');
+                const isEven = randomLane % 2 === 0;
+                car.className = `car-obstacle ${isEven ? 'drive-right' : 'drive-left'}`;
+
+                const asset = carAssets[casino.randomInt(0, carAssets.length - 1)];
+                car.innerHTML = `<img src="../assets/games/chicken/${asset}" alt="car">`;
+                car.style.bottom = `${42 + (randomLane - 1) * 60 + 12}px`;
+                car.style.animationDuration = `${casino.randomFloat() * 1.2 + 1.6}s`;
+
                 road.appendChild(car);
 
                 setTimeout(() => {
                     if (car.parentNode) car.remove();
                 }, 3500);
-            }, 500);
+            }, 550);
         }
 
         function updateStatsUI() {
@@ -245,17 +543,68 @@
             const mult = currentLane > 0 ? multipliers[currentLane - 1] : 1.0;
             multValEl.innerText = `${mult.toFixed(2)}x`;
             const win = Math.floor(currentBet * mult);
-            accumulatedWinningsEl.innerText = win.toLocaleString();
+            accumulatedWinningsEl.innerText = `${win.toLocaleString()} cred.`;
 
             if (currentLane < 8) {
                 nextRiskEl.innerText = `${Math.round(riskRates[currentLane] * 100)}%`;
+                advanceBtn.innerHTML = `<i class="fas fa-forward"></i> Avanzar Carril ${currentLane + 1} (${multipliers[currentLane].toFixed(2)}x)`;
             } else {
-                nextRiskEl.innerText = '¡Meta lograda!';
+                nextRiskEl.innerText = '0% (¡Meta Lograda!)';
+                advanceBtn.innerHTML = `<i class="fas fa-flag-checkered"></i> ¡En la Meta!`;
+            }
+
+            if (currentLane > 0) {
+                cashoutBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Retirar ${win.toLocaleString()} cred. (${mult.toFixed(2)}x)`;
+            } else {
+                cashoutBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Retirar Ganancias`;
+            }
+
+            // Actualizar iluminación visual de los carriles
+            for (let i = 1; i <= 8; i++) {
+                const laneEl = document.getElementById(`lane_${i}`);
+                if (!laneEl) continue;
+                laneEl.classList.remove('passed', 'current', 'next');
+                if (i < currentLane) {
+                    laneEl.classList.add('passed');
+                } else if (i === currentLane) {
+                    laneEl.classList.add('current');
+                } else if (i === currentLane + 1) {
+                    laneEl.classList.add('next');
+                }
             }
         }
 
+        function createFeatherBurst(x, y) {
+            const symbols = ['🪶', '💥', '✨', '💨'];
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.className = 'feather-particle';
+                p.innerText = symbols[casino.randomInt(0, symbols.length - 1)];
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+
+                const angle = casino.randomFloat() * Math.PI * 2;
+                const dist = casino.randomInt(30, 90);
+                p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                p.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+                p.style.setProperty('--rot', `${casino.randomInt(-180, 180)}deg`);
+
+                road.appendChild(p);
+                setTimeout(() => p.remove(), 850);
+            }
+        }
+
+        function showAlert(icon, title, desc, duration = 2500) {
+            alertIcon.innerText = icon;
+            alertTitle.innerText = title;
+            alertDesc.innerText = desc;
+            alertBanner.classList.add('show');
+            setTimeout(() => alertBanner.classList.remove('show'), duration);
+        }
+
+        // Iniciar Partida
         startBtn.addEventListener('click', () => {
-            if (isGameActive || isSettling) return;
+            if (isGameActive) return;
 
             const round = casino.startRound('chickenroad', apuestaInput.value);
             if (!round) return;
@@ -266,113 +615,160 @@
             isGameActive = true;
             isHopping = false;
             isSettling = false;
-            if (autoCashoutTimer) {
-                clearTimeout(autoCashoutTimer);
-                autoCashoutTimer = null;
-            }
+            if (autoCashoutTimer) clearTimeout(autoCashoutTimer);
 
-            buildLanes();
-            const ch = document.getElementById('chickenContainer');
-            const img = document.getElementById('chickenImg');
-            ch.style.bottom = '10px';
-            img.src = '../assets/games/chicken/chicken.svg';
-            img.style.transform = 'scale(1)';
+            // Reiniciar estado visual de la gallina
+            chickenContainer.className = '';
+            chickenContainer.style.bottom = '8px';
 
             startBtn.disabled = true;
+            apuestaInput.disabled = true;
             advanceBtn.disabled = false;
             cashoutBtn.disabled = true;
-            apuestaInput.disabled = true;
 
-            startTraffic();
             updateStatsUI();
-            casino.showToast('¡La gallina inicia su camino! Cuidado con el tráfico.', 'info');
+            startTraffic();
+            showAlert('🐔', '¡Cruce Iniciado!', 'Presiona Avanzar Carril o Espacio para avanzar.', 1400);
         });
 
-        advanceBtn.addEventListener('click', () => {
-            if (!isGameActive || isHopping || isSettling || currentLane >= 8) return;
-
+        // Avanzar Carril
+        async function stepForward() {
+            if (!isGameActive || isHopping || isSettling) return;
             isHopping = true;
             advanceBtn.disabled = true;
-            cashoutBtn.disabled = true;
 
-            const ch = document.getElementById('chickenContainer');
-            const img = document.getElementById('chickenImg');
-            casino.playSound('chip');
+            const targetLane = currentLane + 1;
+            const risk = riskRates[currentLane];
 
-            setTimeout(() => {
-                if (!isGameActive || isSettling) return;
+            // Animación de salto realista y sonido
+            chickenContainer.classList.add('chicken-hopping');
+            casino.playSound('chicken_hop');
 
-                const risk = riskRates[currentLane];
-                const hit = casino.randomFloat() < risk;
+            // Mover la gallina hacia el carril destino
+            const targetBottom = 42 + (targetLane - 1) * 60 + 4;
+            chickenContainer.style.bottom = `${targetBottom}px`;
 
-                if (hit) {
-                    // Atropellada
-                    img.src = '../assets/games/mines/mine.svg';
-                    img.style.transform = 'rotate(180deg) scale(1.2)';
-                    casino.playSound('explosion');
-                    casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
-                    casino.showToast('¡Oh no! Un vehículo chocó a la gallina. Apuesta perdida.', 'error');
+            // Evaluar probabilidad usando CSPRNG sin sesgo
+            const roll = casino.randomFloat();
+            const hitCrash = roll < risk;
+
+            await new Promise(r => setTimeout(r, 380));
+            chickenContainer.classList.remove('chicken-hopping');
+
+            // Pequeñas chispas al aterrizar
+            const rect = chickenContainer.getBoundingClientRect();
+            const roadRect = road.getBoundingClientRect();
+            createFeatherBurst(rect.left - roadRect.left + 28, rect.top - roadRect.top + 28);
+
+            if (hitCrash) {
+                // Choque con un vehículo
+                isGameActive = false;
+                isSettling = true;
+                if (trafficInterval) clearInterval(trafficInterval);
+
+                // Auto del choque a toda velocidad en el carril
+                const crashCar = document.createElement('div');
+                crashCar.className = 'car-obstacle drive-right';
+                crashCar.innerHTML = `<img src="../assets/games/chicken/truck.svg">`;
+                crashCar.style.bottom = `${targetBottom + 8}px`;
+                crashCar.style.animationDuration = '0.35s';
+                crashCar.style.zIndex = '65';
+                road.appendChild(crashCar);
+
+                chickenContainer.classList.add('chicken-crashed');
+                casino.playSound('chicken_crash');
+                createFeatherBurst(rect.left - roadRect.left + 28, rect.top - roadRect.top + 28);
+
+                // Sacudida de pantalla
+                highwayPanel.style.animation = 'shake 0.4s ease';
+                setTimeout(() => highwayPanel.style.animation = '', 450);
+
+                casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
+                showAlert('💥', '¡Atropellada!', `Un camión te impactó en el carril ${targetLane}.`, 3000);
+
+                setTimeout(() => {
+                    if (crashCar.parentNode) crashCar.remove();
                     endGame();
+                }, 1500);
+            } else {
+                // Paso exitoso
+                currentLane = targetLane;
+                updateStatsUI();
+                cashoutBtn.disabled = false;
+                casino.playSound('win');
+
+                if (currentLane === 8) {
+                    // ¡Llegó a la Meta Dorada (23.46x)!
+                    advanceBtn.disabled = true;
+                    showAlert('🏆', '¡META DE ORO ALCANZADA!', 'Retiro automático triunfal.', 1500);
+                    autoCashoutTimer = setTimeout(() => cashOut(), 1200);
                 } else {
-                    // Cruce Exitoso
-                    currentLane++;
-                    ch.style.bottom = `${currentLane * 54 + 10}px`;
-                    casino.playSound('card');
-
-                    updateStatsUI();
-                    isHopping = false;
-
-                    if (currentLane >= 8) {
-                        advanceBtn.disabled = true;
-                        cashoutBtn.disabled = true;
-                        casino.showToast('🏆 ¡INCREÍBLE! Cruzaste toda la carretera sana y salva.', 'win');
-                        autoCashoutTimer = setTimeout(() => cashOut(), 900);
-                    } else {
-                        advanceBtn.disabled = false;
-                        cashoutBtn.disabled = false;
-                    }
+                    advanceBtn.disabled = false;
                 }
-            }, 500);
-        });
+            }
 
-        cashoutBtn.addEventListener('click', cashOut);
+            isHopping = false;
+        }
 
+        advanceBtn.addEventListener('click', stepForward);
+
+        // Retirar Ganancias
         function cashOut() {
-            if (!isGameActive || isSettling || currentLane === 0) return;
+            if (!isGameActive || isSettling) return;
             isGameActive = false;
             isSettling = true;
-
-            if (autoCashoutTimer) {
-                clearTimeout(autoCashoutTimer);
-                autoCashoutTimer = null;
-            }
+            if (autoCashoutTimer) clearTimeout(autoCashoutTimer);
 
             advanceBtn.disabled = true;
             cashoutBtn.disabled = true;
+            if (trafficInterval) clearInterval(trafficInterval);
 
-            const mult = multipliers[currentLane - 1];
-            casino.settleRound(currentRoundId, mult, { showToast: true });
+            const finalMultiplier = multipliers[currentLane - 1];
+            chickenContainer.classList.add('chicken-victory');
 
-            endGame();
+            const result = casino.settleRound(currentRoundId, finalMultiplier, { showToast: true });
+            const wonAmount = result ? result.payout : Math.floor(currentBet * finalMultiplier);
+
+            showAlert('🎉', '¡Ganancias Retiradas!', `Cobraste ${wonAmount.toLocaleString()} créditos (${finalMultiplier.toFixed(2)}x).`, 3000);
+
+            setTimeout(() => {
+                chickenContainer.classList.remove('chicken-victory');
+                endGame();
+            }, 2500);
         }
+
+        cashoutBtn.addEventListener('click', cashOut);
 
         function endGame() {
             isGameActive = false;
             isHopping = false;
             isSettling = false;
-            if (autoCashoutTimer) {
-                clearTimeout(autoCashoutTimer);
-                autoCashoutTimer = null;
-            }
             if (trafficInterval) clearInterval(trafficInterval);
-
             startBtn.disabled = false;
             advanceBtn.disabled = true;
             cashoutBtn.disabled = true;
             apuestaInput.disabled = false;
         }
 
+        // Atajos de Teclado (Espacio para avanzar, R o C para retirar)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isGameActive && !advanceBtn.disabled) {
+                    stepForward();
+                } else if (!isGameActive && !startBtn.disabled) {
+                    startBtn.click();
+                }
+            } else if (e.code === 'KeyR' || e.code === 'KeyC') {
+                if (isGameActive && !cashoutBtn.disabled) {
+                    cashOut();
+                }
+            }
+        });
+
+        // Inicializar carriles en pantalla
         buildLanes();
+        updateStatsUI();
     </script>
 </body>
 </html>

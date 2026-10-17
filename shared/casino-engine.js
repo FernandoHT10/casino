@@ -760,6 +760,26 @@ class CasinoEngine {
                     osc.start(t);
                     osc.stop(t + 0.15);
                     break;
+
+                case 'chicken_hop':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, t);
+                    osc.frequency.exponentialRampToValueAtTime(900, t + 0.12);
+                    gain.gain.setValueAtTime(0.25, t);
+                    gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
+                    osc.start(t);
+                    osc.stop(t + 0.12);
+                    break;
+
+                case 'chicken_crash':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(750, t);
+                    osc.frequency.linearRampToValueAtTime(150, t + 0.35);
+                    gain.gain.setValueAtTime(0.4, t);
+                    gain.gain.linearRampToValueAtTime(0.01, t + 0.35);
+                    osc.start(t);
+                    osc.stop(t + 0.35);
+                    break;
             }
         } catch (e) {
             // Audio no disponible
