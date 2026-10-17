@@ -237,7 +237,7 @@ class CasinoEngine {
                     level: 1,
                     xp: 0,
                     coins: 100,
-                    avatar: '👤',
+                    avatar: 'user',
                     last_bonus: 0
                 };
                 await this.supabase.from('profiles').insert([newProfile]);
@@ -629,7 +629,7 @@ class CasinoEngine {
         }
 
         if (leveledUp) {
-            this.showToast(`⭐ ¡SUBISTE AL NIVEL ${user.level}! (+${rewardCredits} créditos)`, 'win', 4500);
+            this.showToast(`¡Subiste al nivel ${user.level}! Recibes +${rewardCredits} créditos.`, 'win', 4500);
             this.playSound('jackpot');
         }
         this.saveUserCache(user);

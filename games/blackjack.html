@@ -206,7 +206,7 @@
             <!-- Mano del Crupier -->
             <div class="hand-section">
                 <div class="hand-header">
-                    <span>🎩 Crupier</span>
+                    <span><i class="fas fa-user-tie"></i> Crupier</span>
                     <span class="score-pill" id="dealerScore">-</span>
                 </div>
                 <div class="cards-row" id="dealerCards"></div>
@@ -218,7 +218,7 @@
             <!-- Mano del Jugador -->
             <div class="hand-section">
                 <div class="hand-header">
-                    <span>👤 Tu Mano</span>
+                    <span><i class="fas fa-user"></i> Tu Mano</span>
                     <span class="score-pill" id="playerScore">-</span>
                 </div>
                 <div class="cards-row" id="playerCards"></div>
@@ -527,21 +527,17 @@
             const dSum = calculateHand(state.dealerCards);
 
             if (dSum > 21) {
-                // Crupier se pasa (pago 1:1 -> multiplicador 2.0x)
                 casino.settleRound(state.currentRoundId, 2.0, { showToast: true });
-                showResult(`¡El crupier se pasó con ${dSum}! Ganaste créditos (2:1)`, 'win');
+                showResult(`¡El crupier se pasó con ${dSum}! Ganaste la mano.`, 'win');
             } else if (pSum > dSum) {
-                // Jugador gana
                 casino.settleRound(state.currentRoundId, 2.0, { showToast: true });
-                showResult(`¡Ganaste con ${pSum} contra ${dSum} del crupier! (2:1)`, 'win');
+                showResult(`¡Ganaste la mano con ${pSum} frente a ${dSum} del crupier!`, 'win');
             } else if (pSum === dSum) {
-                // Empate
                 casino.settleRound(state.currentRoundId, 1.0, { showToast: true });
-                showResult(`Empate a ${pSum}. Apuesta recuperada.`, 'push');
+                showResult(`Empate con ${pSum}. Se devuelve la apuesta.`, 'push');
             } else {
-                // Crupier gana
                 casino.settleRound(state.currentRoundId, 0, { recordLoss: true, showToast: false });
-                showResult(`Crupier gana con ${dSum} contra tus ${pSum}.`, 'lose');
+                showResult(`El crupier gana con ${dSum} frente a tus ${pSum}.`, 'lose');
             }
 
             resetGameControls();

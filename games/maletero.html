@@ -209,7 +209,7 @@
             const cards = document.querySelectorAll('.case-card');
             cards.forEach(c => c.classList.remove('disabled'));
 
-            statusMsg.innerText = '✨ 6 maletines vacíos y 4 con premios. ¡Elige con cuidado!';
+            statusMsg.innerText = 'Hay 6 maletines vacíos y 4 con premios. Elige el que prefieras.';
             casino.playSound('click');
         });
 
@@ -232,7 +232,7 @@
                 backFace.className = 'case-face case-back win';
             } else {
                 backFace.innerHTML = `
-                    <div style="font-size: 28px; color: #ff4757; margin-bottom: 4px;">❌</div>
+                    <div style="font-size: 24px; color: #ff4757; margin-bottom: 4px;"><i class="fas fa-times"></i></div>
                     <div>VACÍO</div>
                 `;
                 backFace.className = 'case-face case-back empty';
@@ -244,11 +244,11 @@
             if (mult > 0) {
                 casino.settleRound(currentRoundId, mult, { showToast: true });
                 const payout = Math.floor(currentBet * mult);
-                statusMsg.innerText = `🎉 ¡PREMIO! El maletín #${index + 1} contenía x${mult.toFixed(2)} (+${payout.toLocaleString()} créditos).`;
+                statusMsg.innerText = `¡Premio! El maletín #${index + 1} tenía x${mult.toFixed(2)} (+${payout.toLocaleString()} créditos).`;
                 statusMsg.style.color = '#2ed573';
             } else {
                 casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
-                statusMsg.innerText = `😔 El maletín #${index + 1} estaba vacío. Suerte para la próxima.`;
+                statusMsg.innerText = `El maletín #${index + 1} estaba vacío. Más suerte para la próxima.`;
                 statusMsg.style.color = '#ff4757';
             }
 
@@ -262,7 +262,7 @@
                             bf.innerHTML = `<img src="../assets/games/maletero/briefcase_cash.svg" style="width: 35px; height: 35px;"><div>x${m.toFixed(2)}</div>`;
                             bf.className = 'case-face case-back win';
                         } else {
-                            bf.innerHTML = `<div style="font-size: 20px; color: #ff4757;">❌</div><div>0x</div>`;
+                            bf.innerHTML = `<div style="font-size: 18px; color: #ff4757;"><i class="fas fa-times"></i></div><div>0x</div>`;
                             bf.className = 'case-face case-back empty';
                         }
                         c.classList.add('opened');

@@ -414,13 +414,13 @@
 
                     <!-- Salida Inferior -->
                     <div class="road-start-line">
-                        <span class="road-start-text">🚩 ZONA SEGURA DE SALIDA</span>
+                        <span class="road-start-text">ZONA DE SALIDA</span>
                     </div>
 
                     <!-- Banner de Alerta / Celebración -->
                     <div class="highway-alert-banner" id="alertBanner">
-                        <div id="alertIcon" style="font-size: 40px; margin-bottom: 8px;">💥</div>
-                        <h3 id="alertTitle" style="color: #fff; margin-bottom: 4px; font-size: 18px;">¡Atropellada!</h3>
+                        <div id="alertIcon" style="margin-bottom: 8px;"></div>
+                        <h3 id="alertTitle" style="color: #fff; margin-bottom: 4px; font-size: 18px;">Atropellada</h3>
                         <p id="alertDesc" style="color: var(--text-muted); font-size: 13px; margin: 0;">Perdiste la apuesta.</p>
                     </div>
                 </div>
@@ -434,7 +434,7 @@
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
-        casino.renderHeader('gameHeaderNav', { title: '🐔 Chicken Road', backUrl: '../index.html' });
+        casino.renderHeader('gameHeaderNav', { title: 'Chicken Road', backUrl: '../index.html' });
         casino.setupChips('#chipSelector', '#apuesta');
 
         // Multiplicadores oficiales y riesgos (96% RTP exacto de Casino)
@@ -575,16 +575,19 @@
         }
 
         function createFeatherBurst(x, y) {
-            const symbols = ['🪶', '💥', '✨', '💨'];
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 14; i++) {
                 const p = document.createElement('div');
                 p.className = 'feather-particle';
-                p.innerText = symbols[casino.randomInt(0, symbols.length - 1)];
+                p.style.width = '6px';
+                p.style.height = '6px';
+                p.style.borderRadius = '50%';
+                p.style.background = i % 2 === 0 ? '#ffd700' : '#ffffff';
+                p.style.boxShadow = '0 0 6px rgba(255,215,0,0.8)';
                 p.style.left = `${x}px`;
                 p.style.top = `${y}px`;
 
                 const angle = casino.randomFloat() * Math.PI * 2;
-                const dist = casino.randomInt(30, 90);
+                const dist = casino.randomInt(25, 75);
                 p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
                 p.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
                 p.style.setProperty('--rot', `${casino.randomInt(-180, 180)}deg`);
@@ -594,8 +597,8 @@
             }
         }
 
-        function showAlert(icon, title, desc, duration = 2500) {
-            alertIcon.innerText = icon;
+        function showAlert(iconClass, title, desc, duration = 2500) {
+            alertIcon.innerHTML = `<i class="fas ${iconClass}" style="color: var(--gold); font-size: 34px;"></i>`;
             alertTitle.innerText = title;
             alertDesc.innerText = desc;
             alertBanner.classList.add('show');
@@ -628,7 +631,7 @@
 
             updateStatsUI();
             startTraffic();
-            showAlert('🐔', '¡Cruce Iniciado!', 'Presiona Avanzar Carril o Espacio para avanzar.', 1400);
+            showAlert('fa-play', 'Cruce iniciado', 'Usa Avanzar o la barra espaciadora para moverte.', 1400);
         });
 
         // Avanzar Carril
@@ -684,7 +687,7 @@
                 setTimeout(() => highwayPanel.style.animation = '', 450);
 
                 casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
-                showAlert('💥', '¡Atropellada!', `Un camión te impactó en el carril ${targetLane}.`, 3000);
+                showAlert('fa-car-crash', 'Te atropellaron', `Un vehículo te impactó en el carril ${targetLane}.`, 3000);
 
                 setTimeout(() => {
                     if (crashCar.parentNode) crashCar.remove();
@@ -700,7 +703,7 @@
                 if (currentLane === 8) {
                     // ¡Llegó a la Meta Dorada (23.46x)!
                     advanceBtn.disabled = true;
-                    showAlert('🏆', '¡META DE ORO ALCANZADA!', 'Retiro automático triunfal.', 1500);
+                    showAlert('fa-trophy', '¡Llegaste a la meta!', 'Completaste el cruce con éxito.', 1800);
                     autoCashoutTimer = setTimeout(() => cashOut(), 1200);
                 } else {
                     advanceBtn.disabled = false;
@@ -729,7 +732,7 @@
             const result = casino.settleRound(currentRoundId, finalMultiplier, { showToast: true });
             const wonAmount = result ? result.payout : Math.floor(currentBet * finalMultiplier);
 
-            showAlert('🎉', '¡Ganancias Retiradas!', `Cobraste ${wonAmount.toLocaleString()} créditos (${finalMultiplier.toFixed(2)}x).`, 3000);
+            showAlert('fa-check-circle', 'Ganancias cobradas', `Sumaste ${wonAmount.toLocaleString()} créditos a tu saldo.`, 2500);
 
             setTimeout(() => {
                 chickenContainer.classList.remove('chicken-victory');

@@ -37,7 +37,7 @@ db.exec(`
         level INTEGER NOT NULL DEFAULT 1,
         xp INTEGER NOT NULL DEFAULT 0,
         coins INTEGER NOT NULL DEFAULT 100,
-        avatar TEXT DEFAULT '👤',
+        avatar TEXT DEFAULT 'user',
         last_bonus INTEGER DEFAULT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
@@ -91,8 +91,8 @@ function generateSessionToken() {
 }
 
 const AVATAR_CATALOG = Object.freeze({
-    'crown': { price: 5000, name: 'Corona Rey', icon: '👑' },
-    'diamond': { price: 5000, name: 'Diamante', icon: '💎' }
+    'crown': { price: 5000, name: 'Corona Rey', icon: 'crown' },
+    'diamond': { price: 5000, name: 'Diamante', icon: 'diamond' }
 });
 
 function calculateProgression(user, xpGained) {
@@ -184,7 +184,7 @@ app.post('/api/auth/register', (req, res) => {
 
         const insertUser = db.prepare(`
             INSERT INTO users (username, password_hash, salt, saldo, level, xp, coins, avatar, created_at, updated_at)
-            VALUES (?, ?, ?, 10000, 1, 0, 100, '👤', ?, ?)
+            VALUES (?, ?, ?, 10000, 1, 0, 100, 'user', ?, ?)
         `);
         const result = insertUser.run(cleanUsername, passwordHash, salt, now, now);
         const userId = Number(result.lastInsertRowid);
@@ -201,7 +201,7 @@ app.post('/api/auth/register', (req, res) => {
             level: 1,
             xp: 0,
             coins: 100,
-            avatar: '👤',
+            avatar: 'user',
             last_bonus: null
         };
 
@@ -524,7 +524,7 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`====================================================`);
-    console.log(`  🎰 CASINO ROYAL AC - BACKEND INICIADO EN PUERTO ${PORT}`);
-    console.log(`  🔗 Abre tu navegador en: http://localhost:${PORT}`);
+    console.log(`  CASINO ROYAL AC - BACKEND INICIADO EN PUERTO ${PORT}`);
+    console.log(`  Abre tu navegador en: http://localhost:${PORT}`);
     console.log(`====================================================`);
 });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎡 Ruleta Europea 🎡 - Casino AC</title>
+    <title>Ruleta Europea - Casino AC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../shared/casino-shared.css">
     <style>
@@ -234,7 +234,7 @@
             <div class="wheel-panel">
                 <div class="wheel-container">
                     <div class="wheel-pointer"></div>
-                    <div class="wheel-hub">🎡</div>
+                    <div class="wheel-hub"><i class="fas fa-circle-notch"></i></div>
                     <svg id="wheelSvg" viewBox="0 0 400 400"></svg>
                 </div>
 
@@ -325,7 +325,7 @@
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
-        casino.renderHeader('gameHeaderNav', { title: '🎡 Ruleta Europea', backUrl: '../index.html' });
+        casino.renderHeader('gameHeaderNav', { title: 'Ruleta Europea', backUrl: '../index.html' });
         casino.setupChips('#chipSelector', '#apuesta');
 
         // Ruleta Europea Estándar: 37 casillas (0 al 36)
@@ -548,11 +548,11 @@
                 if (totalReturn > 0) {
                     resultCallout.style.background = 'rgba(46, 213, 115, 0.25)';
                     resultCallout.style.color = '#2ed573';
-                    resultCallout.innerText = `🎉 ¡Cayó el ${winningNum} (${colorText})! Retorno total: ${totalReturn.toLocaleString()} créditos.`;
+                    resultCallout.innerText = `Salió el número ${winningNum} (${colorText}). Ganaste ${totalReturn.toLocaleString()} créditos.`;
                 } else {
                     resultCallout.style.background = 'rgba(255, 71, 87, 0.25)';
                     resultCallout.style.color = '#ff4757';
-                    resultCallout.innerText = `😔 Cayó el ${winningNum} (${colorText}). No hubo aciertos.`;
+                    resultCallout.innerText = `Salió el número ${winningNum} (${colorText}). No hubo aciertos en esta tirada.`;
                 }
 
                 // Limpiar apuestas para la próxima ronda

@@ -3,8 +3,8 @@
  */
 
 const AVATAR_CATALOG = Object.freeze({
-    'crown': { price: 5000, name: 'Corona Rey', icon: '👑' },
-    'diamond': { price: 5000, name: 'Diamante', icon: '💎' }
+    'crown': { price: 5000, name: 'Corona Rey', icon: 'crown' },
+    'diamond': { price: 5000, name: 'Diamante', icon: 'diamond' }
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -74,9 +74,9 @@ function checkSupabaseSetupNotice() {
 
     if (isPlaceholder && authHeader) {
         authHeader.innerHTML = `
-            Inicia sesión o regístrate en la nube.<br>
+            Ingresa con tu cuenta o crea una nueva para comenzar a jugar.<br>
             <span style="display: inline-block; margin-top: 8px; font-size: 11px; color: var(--gold); background: rgba(255,215,0,0.1); border: 1px dashed var(--gold); padding: 4px 10px; border-radius: 6px;">
-                <i class="fas fa-cloud"></i> Base de datos Supabase: pega tu URL y Anon Key en <code>shared/supabase-config.js</code>
+                <i class="fas fa-key"></i> Conecta tu proyecto de Supabase en <code>shared/supabase-config.js</code>
             </span>
         `;
     }
@@ -120,9 +120,9 @@ function updateUserUI() {
     if (xpEl) xpEl.innerText = user.xp || 0;
     if (coinsEl) coinsEl.innerText = user.coins || 0;
     if (avatarEl) {
-        if (user.avatar === 'crown') avatarEl.innerText = '👑';
-        else if (user.avatar === 'diamond') avatarEl.innerText = '💎';
-        else avatarEl.innerText = user.avatar || '👤';
+        if (user.avatar === 'crown') avatarEl.innerHTML = '<i class="fas fa-crown" style="color: var(--gold);"></i>';
+        else if (user.avatar === 'diamond') avatarEl.innerHTML = '<i class="fas fa-gem" style="color: #00f2fe;"></i>';
+        else avatarEl.innerHTML = '<i class="fas fa-user"></i>';
     }
 }
 
@@ -152,14 +152,14 @@ function setupAuthListeners() {
             }
 
             loginBtn.disabled = true;
-            setAuthMsg('Conectando a Supabase Cloud...', 'success');
+            setAuthMsg('Comprobando credenciales...', 'success');
 
             const res = await casino.loginWithSupabase(u, p);
             loginBtn.disabled = false;
 
             if (res.success) {
                 casino.playSound('win');
-                setAuthMsg('¡Bienvenido de vuelta! 🎉', 'success');
+                setAuthMsg('Sesión iniciada. ¡Buena suerte!', 'success');
                 setTimeout(() => checkSession(), 400);
             } else {
                 setAuthMsg(res.error || 'Credenciales incorrectas.');
@@ -193,17 +193,17 @@ function setupAuthListeners() {
             }
 
             registerBtn.disabled = true;
-            setAuthMsg('Creando cuenta segura en la nube...', 'success');
+            setAuthMsg('Creando cuenta...', 'success');
 
             const res = await casino.registerWithSupabase(u, p);
             registerBtn.disabled = false;
 
             if (res.success) {
                 casino.playSound('jackpot');
-                setAuthMsg('¡Cuenta creada con éxito! +10,000 créditos en la nube.', 'success');
+                setAuthMsg('Cuenta creada correctamente. Te acreditamos 10.000 créditos de bienvenida.', 'success');
                 setTimeout(() => checkSession(), 400);
             } else {
-                setAuthMsg(res.error || 'Error al registrar usuario.');
+                setAuthMsg(res.error || 'No se pudo crear la cuenta.');
                 casino.playSound('lose');
             }
         });
@@ -255,7 +255,7 @@ function setupShopListeners() {
             if (res.success) {
                 updateUserUI();
                 casino.playSound('jackpot');
-                casino.showToast('¡Has reclamado tu bono diario de 2,000 créditos! 🎁', 'win');
+                casino.showToast('Bono diario acreditado. Sumaste 2.000 créditos a tu cuenta.', 'win');
             } else {
                 casino.showToast(res.error || 'No se pudo reclamar el bono.', 'error');
                 casino.playSound('lose');
@@ -280,7 +280,7 @@ function setupShopListeners() {
             if (res.success) {
                 updateUserUI();
                 casino.playSound('win');
-                casino.showToast('¡Canjeaste 50 fichas VIP por 1,000 créditos!', 'win');
+                casino.showToast('Canjeaste 50 fichas VIP por 1.000 créditos.', 'win');
             } else {
                 casino.showToast(res.error || 'Error al canjear fichas.', 'error');
                 casino.playSound('lose');
@@ -306,7 +306,7 @@ function setupShopListeners() {
             if (res.success) {
                 updateUserUI();
                 casino.playSound('win');
-                casino.showToast(`¡Compraste el avatar ${res.name || ''}!`, 'win');
+                casino.showToast(`Compraste el avatar ${res.name || ''}.`, 'win');
             } else {
                 casino.showToast(res.error || 'Error al comprar avatar.', 'error');
                 casino.playSound('lose');

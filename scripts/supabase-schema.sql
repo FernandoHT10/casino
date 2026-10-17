@@ -19,7 +19,7 @@ create table if not exists public.profiles (
     level integer not null default 1 check (level >= 1),
     xp integer not null default 0 check (xp >= 0),
     coins integer not null default 100 check (coins >= 0),
-    avatar text not null default '👤',
+    avatar text not null default 'user',
     last_bonus bigint not null default 0,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
@@ -61,7 +61,7 @@ begin
         1,
         0,
         100,
-        '👤',
+        'user',
         0
     )
     on conflict (id) do nothing;

@@ -274,7 +274,7 @@
             isSpinning = true;
             spinBtn.disabled = true;
             apuestaInput.disabled = true;
-            jackpotText.innerText = 'Girando los rodillos... ⚡';
+            jackpotText.innerText = 'Girando los rodillos...';
             jackpotText.style.color = '#fff';
 
             reels.forEach(r => {
@@ -336,7 +336,7 @@
                 reels.forEach(r => r.classList.add('win-flash'));
                 casino.settleRound(round.roundId, mult, { showToast: true });
                 const payout = Math.floor(round.betAmount * mult);
-                jackpotText.innerText = `👑 ¡JACKPOT! 3x ${s1.toUpperCase()} (+${payout.toLocaleString()} créditos)`;
+                jackpotText.innerText = `¡Premio mayor! 3x ${s1.toUpperCase()} (+${payout.toLocaleString()} créditos)`;
                 jackpotText.style.color = '#ffd700';
             } 
             // Consuelo: 2 Cerezas
@@ -348,13 +348,13 @@
                 mult = 0.5;
                 casino.settleRound(round.roundId, mult, { showToast: true });
                 const payout = Math.floor(round.betAmount * mult);
-                jackpotText.innerText = `🍒 Dos cerezas: recuperas ${payout.toLocaleString()} créditos.`;
+                jackpotText.innerText = `Dos cerezas: recuperas ${payout.toLocaleString()} créditos.`;
                 jackpotText.style.color = '#2ed573';
             } 
             // Sin combinación
             else {
                 casino.settleRound(round.roundId, 0, { recordLoss: true, showToast: false });
-                jackpotText.innerText = '😔 Sin combinación. ¡Prueba de nuevo!';
+                jackpotText.innerText = 'Sin premio en esta tirada. Vuelve a intentarlo.';
                 jackpotText.style.color = '#ff4757';
             }
         }

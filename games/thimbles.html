@@ -276,7 +276,7 @@
             await new Promise(r => setTimeout(r, 400));
             winBall.style.display = 'none';
 
-            statusMsg.innerText = '🌪️ ¡Sigue el vaso con la vista!';
+            statusMsg.innerText = 'Sigue el vaso con la vista...';
 
             // 4. Barajado Físico Real con CSPRNG
             const numSwaps = totalCups === 2 ? 5 : 7;
@@ -292,7 +292,7 @@
             // 5. Finalizar barajado y permitir elección
             isShuffling = false;
             cups.forEach(c => c.classList.remove('disabled'));
-            statusMsg.innerText = '🤔 ¿En cuál de los vasos quedó la bola? ¡Elige!';
+            statusMsg.innerText = '¿Dónde quedó la bola? Haz tu elección.';
             casino.playSound('click');
         });
 
@@ -320,13 +320,13 @@
                     // Ganó
                     casino.settleRound(currentRoundId, mult, { showToast: true });
                     const payout = Math.floor(currentBet * mult);
-                    statusMsg.innerText = `🎉 ¡EXCELENTE VISTA! Acertaste el vaso ganador (+${payout.toLocaleString()} créditos).`;
+                    statusMsg.innerText = `¡Acertaste! Encontraste la bola y ganaste ${payout.toLocaleString()} créditos (${mult.toFixed(2)}x).`;
                     statusMsg.style.color = '#2ed573';
                 } else {
                     // Falló: levantar también el vaso donde estaba la bola
                     winningCupEl.classList.add('lifted');
                     casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
-                    statusMsg.innerText = `😔 ¡Fallaste! La bola estaba en el otro cubilete.`;
+                    statusMsg.innerText = `No estaba ahí. La bola quedó en el otro vaso.`;
                     statusMsg.style.color = '#ff4757';
                 }
 
