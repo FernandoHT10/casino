@@ -996,6 +996,7 @@ class CasinoEngine {
             created_at: new Date().toISOString()
         };
 
+        let isTableMissing = false;
         if (this.supabase) {
             try {
                 const { data, error } = await this.supabase
@@ -1008,9 +1009,12 @@ class CasinoEngine {
                     const list = await this.getAnnouncements();
                     const updated = [data, ...list.filter(item => item.id !== data.id)];
                     localStorage.setItem('casino_announcements_cache', JSON.stringify(updated));
-                    return { success: true, data };
+                    return { success: true, data, isLocal: false };
                 } else if (error) {
                     console.warn('[CasinoEngine] Error al insertar comunicado en Supabase:', error.message);
+                    if (error.code === 'PGRST205' || (error.message && error.message.includes('not find the table'))) {
+                        isTableMissing = true;
+                    }
                 }
             } catch (err) {
                 console.warn('[CasinoEngine] Excepción de red en Supabase:', err);
@@ -1025,7 +1029,26 @@ class CasinoEngine {
         const list = await this.getAnnouncements();
         const updated = [localNotice, ...list.filter(item => item.id !== localNotice.id)];
         localStorage.setItem('casino_announcements_cache', JSON.stringify(updated));
-        return { success: true, data: localNotice, isLocal: true };
+        return { success: true, data: localNotice, isLocal: true, missingTable: isTableMissing };
+    }
+
+    async checkAnnouncementsTableStatus() {
+        if (!this.supabase) return { connected: false, missingTable: true };
+        try {
+            const { error } = await this.supabase
+                .from('announcements')
+                .select('id')
+                .limit(1);
+
+            if (error) {
+                const isMissing = error.code === 'PGRST205' || 
+                                  (error.message && error.message.includes('not find the table'));
+                return { connected: false, missingTable: isMissing, error: error.message };
+            }
+            return { connected: true, missingTable: false };
+        } catch (e) {
+            return { connected: false, missingTable: true, error: e.message };
+        }
     }
 
     async deleteAnnouncement(id) {

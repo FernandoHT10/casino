@@ -363,8 +363,11 @@ function setupNotificationListeners() {
                 adminToggleBtn.style.borderColor = 'var(--gold)';
                 adminToggleBtn.style.color = 'var(--gold)';
             }
+            checkTableWarning();
         } else {
             if (composerBox) composerBox.style.display = 'none';
+            const warningBanner = document.getElementById('adminSupabaseNoticeBanner');
+            if (warningBanner) warningBanner.style.display = 'none';
             if (adminToggleBtn) {
                 adminToggleBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Panel Admin';
                 adminToggleBtn.style.borderColor = '';
@@ -592,6 +595,62 @@ function setupNotificationListeners() {
         });
     }
 
+    async function checkTableWarning() {
+        const warningBanner = document.getElementById('adminSupabaseNoticeBanner');
+        if (!warningBanner) return;
+        if (!isAdminNoticeMode) {
+            warningBanner.style.display = 'none';
+            return;
+        }
+        const status = await casino.checkAnnouncementsTableStatus();
+        if (status.missingTable) {
+            warningBanner.style.display = 'block';
+        } else {
+            warningBanner.style.display = 'none';
+        }
+    }
+
+    const copySqlBtn = document.getElementById('copyAnnouncementsSqlBtn');
+    if (copySqlBtn) {
+        copySqlBtn.addEventListener('click', () => {
+            const sql = `create table if not exists public.announcements (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    content text not null,
+    author text not null default 'Administración',
+    badge text not null default 'Novedad',
+    is_active boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+alter table public.announcements enable row level security;
+
+drop policy if exists "Lectura pública de avisos" on public.announcements;
+create policy "Lectura pública de avisos" on public.announcements for select using (is_active = true);
+
+drop policy if exists "Crear avisos" on public.announcements;
+create policy "Crear avisos" on public.announcements for insert with check (true);
+
+drop policy if exists "Modificar avisos" on public.announcements;
+create policy "Modificar avisos" on public.announcements for update using (true);
+
+drop policy if exists "Eliminar avisos" on public.announcements;
+create policy "Eliminar avisos" on public.announcements for delete using (true);
+
+alter publication supabase_realtime add table public.announcements;`;
+
+            navigator.clipboard.writeText(sql).then(() => {
+                copySqlBtn.innerHTML = '<i class="fas fa-check"></i> Código SQL Copiado';
+                casino.showToast('Código SQL copiado al portapapeles. Pégalo en SQL Editor en Supabase y presiona Run.', 'win', 5000);
+                setTimeout(() => {
+                    copySqlBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar Código SQL de Supabase';
+                }, 3000);
+            }).catch(() => {
+                casino.showToast('No se pudo copiar automáticamente. Copia el archivo scripts/supabase-announcements.sql.', 'error');
+            });
+        });
+    }
+
     // Publicar Comunicado
     if (publishBtn) {
         let isPublishing = false;
@@ -631,7 +690,13 @@ function setupNotificationListeners() {
                 if (titleInput) titleInput.value = '';
                 if (contentInput) contentInput.value = '';
                 casino.playSound('jackpot');
-                casino.showToast('Comunicado oficial publicado con éxito.', 'win');
+
+                if (res.isLocal) {
+                    casino.showToast('Aviso guardado solo en este navegador. Falta crear la tabla en Supabase.', 'error', 6000);
+                    checkTableWarning();
+                } else {
+                    casino.showToast('Comunicado oficial publicado y transmitido en vivo por Supabase.', 'win', 4000);
+                }
                 await renderAnnouncements();
             } else {
                 casino.showToast(res.error || 'No se pudo publicar el comunicado.', 'error');

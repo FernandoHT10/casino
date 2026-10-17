@@ -289,6 +289,19 @@
                     </button>
                 </div>
 
+                <!-- Banner de advertencia si la tabla de Supabase aún no existe -->
+                <div id="adminSupabaseNoticeBanner" style="display: none; background: rgba(255, 71, 87, 0.12); border: 1px solid rgba(255, 71, 87, 0.35); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.82rem; color: #ffccd0;">
+                    <div style="font-weight: 700; color: #ff6b81; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-exclamation-triangle"></i> Tabla en la nube no detectada
+                    </div>
+                    Tus comunicados actualmente solo se guardan en tu navegador. Para que se sincronicen en vivo con todos los jugadores del mundo, ejecuta el código SQL en tu Supabase:
+                    <div style="margin-top: 8px;">
+                        <button type="button" id="copyAnnouncementsSqlBtn" class="casino-btn casino-btn-primary" style="padding: 6px 12px; font-size: 11px;">
+                            <i class="fas fa-copy"></i> Copiar Código SQL de Supabase
+                        </button>
+                    </div>
+                </div>
+
                 <div style="margin-bottom: 10px;">
                     <label style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Título del Comunicado</label>
                     <input type="text" id="newNoticeTitle" class="notice-input" placeholder="Ej: Torneo especial de fin de semana">
