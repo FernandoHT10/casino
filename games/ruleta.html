@@ -192,6 +192,28 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.5);
         }
 
+        .has-bet {
+            position: relative;
+            outline: 2px solid var(--gold) !important;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.6) !important;
+        }
+
+        .has-bet::after {
+            content: attr(data-bet);
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: #ffd700;
+            color: #000;
+            font-size: 10px;
+            font-weight: 900;
+            border-radius: 10px;
+            padding: 1px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            z-index: 5;
+            pointer-events: none;
+        }
+
         .result-callout {
             text-align: center;
             font-size: 1.4rem;
@@ -282,12 +304,24 @@
                         0 (Verde)
                     </button>
                     <div class="numbers-grid" id="numbersGrid"></div>
+
+                    <!-- Botones de Acción de Mesa de Ruleta Real -->
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="casino-btn casino-btn-primary" id="spinWheelBtn" style="flex: 2; padding: 14px; font-size: 15px;">
+                            <i class="fas fa-play"></i> Girar Ruleta (<span id="totalTableBetDisplay">0</span> cred.)
+                        </button>
+                        <button class="casino-btn casino-nav-btn" id="clearBetsBtn" style="flex: 1; padding: 14px; font-size: 14px;">
+                            <i class="fas fa-trash-alt"></i> Limpiar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
@@ -304,17 +338,23 @@
         let isSpinning = false;
         let currentRotation = 0;
 
+        // Escrow de apuestas en mesa (Caja de Casino Real)
+        let currentBets = {};
+        let totalTableBet = 0;
+
         const wheelSvg = document.getElementById('wheelSvg');
         const apuestaInput = document.getElementById('apuesta');
         const resultCallout = document.getElementById('rouletteResult');
         const historyStrip = document.getElementById('historyStrip');
+        const spinWheelBtn = document.getElementById('spinWheelBtn');
+        const clearBetsBtn = document.getElementById('clearBetsBtn');
+        const totalTableBetDisplay = document.getElementById('totalTableBetDisplay');
 
         function getNumberColor(num) {
             if (num === 0) return '#27ae60';
             return redNumbers.includes(num) ? '#d63031' : '#1e272e';
         }
 
-        // Construir SVG de la Ruleta
         function drawWheel() {
             const cx = 200, cy = 200, r = 195;
             const slice = 360 / europeanOrder.length;
@@ -339,7 +379,6 @@
                 path.setAttribute('stroke-width', '1');
                 wheelSvg.appendChild(path);
 
-                // Texto del Número
                 const textAngle = (i * slice + slice / 2 - 90);
                 const textRad = textAngle * Math.PI / 180;
                 const tx = cx + (r - 24) * Math.cos(textRad);
@@ -359,7 +398,6 @@
             });
         }
 
-        // Construir Tablero de Números (1 a 36)
         function drawBoard() {
             const grid = document.getElementById('numbersGrid');
             grid.innerHTML = '';
@@ -369,6 +407,7 @@
                 btn.dataset.type = 'number';
                 btn.dataset.val = i;
                 btn.innerText = i;
+                btn.addEventListener('click', () => placeBet('number', i, btn));
                 grid.appendChild(btn);
             }
         }
@@ -384,25 +423,84 @@
             });
         }
 
-        // Ejecutar Apuesta y Giro
-        function spinTo(betType, betValue) {
+        function placeBet(type, val, btnEl) {
             if (isSpinning) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            const chipAmount = parseInt(apuestaInput.value);
+            if (isNaN(chipAmount) || chipAmount <= 0) {
+                casino.showToast('Ingresa un monto de apuesta válido.', 'error');
+                return;
+            }
+
+            casino.syncFromStorage();
+            const currentSaldo = casino.getSaldo();
+            if (totalTableBet + chipAmount > currentSaldo) {
+                casino.showToast(`Saldo insuficiente. Tienes ${currentSaldo.toLocaleString()} créditos.`, 'error');
+                casino.playSound('lose');
+                return;
+            }
+
+            const key = `${type}_${val}`;
+            if (!currentBets[key]) {
+                currentBets[key] = { type, val, amount: 0, el: btnEl };
+            }
+            currentBets[key].amount += chipAmount;
+            totalTableBet += chipAmount;
+
+            btnEl.classList.add('has-bet');
+            btnEl.setAttribute('data-bet', currentBets[key].amount);
+            totalTableBetDisplay.innerText = totalTableBet.toLocaleString();
+            casino.playSound('chip');
+        }
+
+        function clearTableBets() {
+            if (isSpinning) return;
+            currentBets = {};
+            totalTableBet = 0;
+            document.querySelectorAll('.has-bet').forEach(b => {
+                b.classList.remove('has-bet');
+                b.removeAttribute('data-bet');
+            });
+            totalTableBetDisplay.innerText = '0';
+            casino.playSound('click');
+        }
+
+        clearBetsBtn.addEventListener('click', clearTableBets);
+
+        function setControlsDisabled(disabled) {
+            spinWheelBtn.disabled = disabled;
+            clearBetsBtn.disabled = disabled;
+            apuestaInput.disabled = disabled;
+            document.querySelectorAll('.bet-action-btn, .num-btn').forEach(b => b.disabled = disabled);
+            document.querySelectorAll('.casino-chip').forEach(c => c.style.pointerEvents = disabled ? 'none' : 'auto');
+        }
+
+        // Ejecutar Giro Atómico
+        spinWheelBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+
+            if (totalTableBet <= 0) {
+                casino.showToast('Coloca al menos una ficha en el tapete antes de girar.', 'error');
+                casino.playSound('lose');
+                return;
+            }
+
+            // Descontar apuesta en una sola transacción atómica
+            const round = casino.startRound('ruleta', totalTableBet);
+            if (!round) return;
 
             isSpinning = true;
-            document.querySelectorAll('.bet-action-btn').forEach(b => b.disabled = true);
+            setControlsDisabled(true);
             resultCallout.style.display = 'none';
 
-            // Elegir número aleatorio
-            const winIdx = Math.floor(Math.random() * europeanOrder.length);
-            const winningNum = europeanOrder[winIdx];
+            // Elección del número ganador mediante CSPRNG antes de la animación
+            const winningNum = casino.randomInt(0, 36);
 
-            // Cálculo angular para que el número quede alineado en el puntero superior
+            // Cálculo angular exacto para alinear con el puntero superior
+            const winIdx = europeanOrder.indexOf(winningNum);
             const slice = 360 / europeanOrder.length;
             const targetSectorAngle = winIdx * slice + slice / 2;
-            const fullSpins = (5 + Math.floor(Math.random() * 3)) * 360;
+            const fullSpins = (5 + casino.randomInt(0, 2)) * 360;
             const finalAngle = fullSpins + (360 - targetSectorAngle);
 
             currentRotation += finalAngle;
@@ -410,36 +508,36 @@
             casino.playSound('spin');
 
             setTimeout(() => {
-                isSpinning = false;
-                document.querySelectorAll('.bet-action-btn').forEach(b => b.disabled = false);
-
-                // Determinar resultado
+                // Determinar resultado y pagos de cada apuesta
                 const isRed = redNumbers.includes(winningNum);
                 const isBlack = !isRed && winningNum !== 0;
-                let won = false;
-                let payout = 0;
+                let totalReturn = 0;
 
-                if (betType === 'number' && parseInt(betValue) === winningNum) {
-                    won = true;
-                    payout = bet * 36; // Pago estándar 36x
-                } else if (betType === 'color') {
-                    if ((betValue === 'rojo' && isRed) || (betValue === 'negro' && isBlack)) {
-                        won = true;
-                        payout = bet * 2;
+                Object.values(currentBets).forEach(bet => {
+                    if (bet.type === 'number' && parseInt(bet.val) === winningNum) {
+                        totalReturn += bet.amount * 36; // Pleno 36x
+                    } else if (winningNum !== 0) {
+                        if (bet.type === 'color') {
+                            if ((bet.val === 'rojo' && isRed) || (bet.val === 'negro' && isBlack)) {
+                                totalReturn += bet.amount * 2;
+                            }
+                        } else if (bet.type === 'parity') {
+                            if ((bet.val === 'par' && winningNum % 2 === 0) || (bet.val === 'impar' && winningNum % 2 !== 0)) {
+                                totalReturn += bet.amount * 2;
+                            }
+                        } else if (bet.type === 'range') {
+                            if ((bet.val === '1-18' && winningNum <= 18) || (bet.val === '19-36' && winningNum >= 19)) {
+                                totalReturn += bet.amount * 2;
+                            }
+                        }
                     }
-                } else if (betType === 'parity' && winningNum !== 0) {
-                    if ((betValue === 'par' && winningNum % 2 === 0) || (betValue === 'impar' && winningNum % 2 !== 0)) {
-                        won = true;
-                        payout = bet * 2;
-                    }
-                } else if (betType === 'range' && winningNum !== 0) {
-                    if ((betValue === '1-18' && winningNum <= 18) || (betValue === '19-36' && winningNum >= 19)) {
-                        won = true;
-                        payout = bet * 2;
-                    }
-                }
+                });
 
-                // Guardar en historial
+                // Liquidación única de la ronda
+                const finalMultiplier = totalReturn / round.betAmount;
+                casino.settleRound(round.roundId, finalMultiplier, { showToast: true });
+
+                // Historial
                 history.unshift(winningNum);
                 localStorage.setItem('casino_roulette_history', JSON.stringify(history));
                 updateHistoryUI();
@@ -447,37 +545,40 @@
                 const colorText = winningNum === 0 ? 'Verde' : (isRed ? 'Rojo' : 'Negro');
                 resultCallout.style.display = 'block';
 
-                if (won) {
-                    casino.addPayout(payout, payout / bet, { showToast: true });
+                if (totalReturn > 0) {
                     resultCallout.style.background = 'rgba(46, 213, 115, 0.25)';
                     resultCallout.style.color = '#2ed573';
-                    resultCallout.innerText = `🎉 ¡Cayó el ${winningNum} (${colorText})! Ganaste ${payout.toLocaleString()} créditos.`;
+                    resultCallout.innerText = `🎉 ¡Cayó el ${winningNum} (${colorText})! Retorno total: ${totalReturn.toLocaleString()} créditos.`;
                 } else {
-                    casino.recordLoss(bet);
                     resultCallout.style.background = 'rgba(255, 71, 87, 0.25)';
                     resultCallout.style.color = '#ff4757';
-                    resultCallout.innerText = `😔 Cayó el ${winningNum} (${colorText}). No hubo suerte esta vez.`;
+                    resultCallout.innerText = `😔 Cayó el ${winningNum} (${colorText}). No hubo aciertos.`;
                 }
-            }, 5100);
-        }
 
-        // Asignar listeners a botones de apuestas
-        document.querySelectorAll('.bet-action-btn').forEach(btn => {
+                // Limpiar apuestas para la próxima ronda
+                currentBets = {};
+                totalTableBet = 0;
+                document.querySelectorAll('.has-bet').forEach(b => {
+                    b.classList.remove('has-bet');
+                    b.removeAttribute('data-bet');
+                });
+                totalTableBetDisplay.innerText = '0';
+
+                isSpinning = false;
+                setControlsDisabled(false);
+            }, 5100);
+        });
+
+        // Asignar listeners a apuestas externas y al 0
+        document.querySelectorAll('.bet-category-btn, .num-btn.zero').forEach(btn => {
             btn.addEventListener('click', () => {
-                spinTo(btn.dataset.type, btn.dataset.val);
+                placeBet(btn.dataset.type, btn.dataset.val, btn);
             });
         });
 
         drawWheel();
         drawBoard();
         updateHistoryUI();
-
-        // Asignar listeners a los números generados
-        document.querySelectorAll('.num-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                spinTo(btn.dataset.type, btn.dataset.val);
-            });
-        });
     </script>
 </body>
 </html>

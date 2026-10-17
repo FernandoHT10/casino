@@ -210,6 +210,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
@@ -219,9 +221,11 @@
         let numMines = 4;
         let bombs = [];
         let revealedGems = 0;
+        let currentRoundId = null;
         let currentBet = 0;
         let currentMultiplier = 1.0;
         let isGameActive = false;
+        let isProcessingClick = false;
 
         const startBtn = document.getElementById('startBtn');
         const cashoutBtn = document.getElementById('cashoutBtn');
@@ -244,12 +248,14 @@
             });
         });
 
+        // Fórmula Hipergeométrica Oficial (96% RTP calibrado)
         function calculateMultiplier(step, minesCount) {
             let prob = 1;
             for (let i = 0; i < step; i++) {
                 prob *= (25 - minesCount - i) / (25 - i);
             }
-            return Math.max(1.08, 0.95 / prob);
+            // Retorno truncado a 2 decimales sin pisos artificiales
+            return Math.floor((0.96 / prob) * 100) / 100;
         }
 
         function resetBoardDisplay() {
@@ -273,19 +279,20 @@
         startBtn.addEventListener('click', () => {
             if (isGameActive) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            const round = casino.startRound('mines', apuestaInput.value);
+            if (!round) return;
 
-            currentBet = bet;
+            currentRoundId = round.roundId;
+            currentBet = round.betAmount;
             isGameActive = true;
+            isProcessingClick = false;
             revealedGems = 0;
             currentMultiplier = 1.0;
 
-            bombs = [];
-            while (bombs.length < numMines) {
-                const pos = Math.floor(Math.random() * 25);
-                if (!bombs.includes(pos)) bombs.push(pos);
-            }
+            // Generación de minas imparcial usando Fisher-Yates CSPRNG
+            const positions = Array.from({ length: 25 }, (_, i) => i);
+            const shuffled = casino.shuffleArray(positions);
+            bombs = shuffled.slice(0, numMines);
 
             resetBoardDisplay();
             startBtn.disabled = true;
@@ -298,8 +305,9 @@
         });
 
         function handleTileClick(index, tileEl) {
-            if (!isGameActive || tileEl.classList.contains('revealed')) return;
+            if (!isGameActive || tileEl.classList.contains('revealed') || isProcessingClick) return;
 
+            isProcessingClick = true;
             tileEl.classList.add('revealed');
 
             if (bombs.includes(index)) {
@@ -308,7 +316,8 @@
                 tileEl.innerHTML = `<img src="../assets/games/mines/mine.svg" alt="mine">`;
                 isGameActive = false;
                 casino.playSound('explosion');
-                casino.recordLoss(currentBet);
+                
+                casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
 
                 // Revelar todas las demás minas
                 document.querySelectorAll('.mine-tile').forEach((t, idx) => {
@@ -336,8 +345,10 @@
                 cashoutAmountEl.innerText = currentProfit.toLocaleString();
 
                 cashoutBtn.disabled = false;
+                isProcessingClick = false;
 
                 if (revealedGems === (25 - numMines)) {
+                    cashoutBtn.disabled = true;
                     casino.showToast('🏆 ¡TABLERO LIMPIO! Descubriste todas las gemas.', 'win');
                     cashOut();
                 }
@@ -349,9 +360,9 @@
         function cashOut() {
             if (!isGameActive || revealedGems === 0) return;
             isGameActive = false;
+            cashoutBtn.disabled = true;
 
-            const totalPayout = Math.floor(currentBet * currentMultiplier);
-            casino.addPayout(totalPayout, currentMultiplier, { showToast: true });
+            casino.settleRound(currentRoundId, currentMultiplier, { showToast: true });
 
             document.querySelectorAll('.mine-tile').forEach((t, idx) => {
                 if (!t.classList.contains('revealed')) {
@@ -366,6 +377,8 @@
         }
 
         function endGame() {
+            isGameActive = false;
+            isProcessingClick = false;
             startBtn.disabled = false;
             cashoutBtn.disabled = true;
             apuestaInput.disabled = false;

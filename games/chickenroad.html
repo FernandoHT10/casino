@@ -170,21 +170,27 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
         casino.renderHeader('gameHeaderNav', { title: 'Chicken Road', backUrl: '../index.html' });
         casino.setupChips('#chipSelector', '#apuesta');
 
-        // Riesgo real escalado (Sin victorias regaladas)
-        const multipliers = [1.20, 1.50, 2.00, 2.80, 4.00, 6.50, 11.00, 20.00];
+        // Multiplicadores calibrados con RTP exacto del 96%
+        // Formula: 0.96 / P_k donde P_k = acumulado de (1 - risk)
+        const multipliers = [1.14, 1.42, 1.88, 2.64, 4.01, 6.57, 11.73, 23.46];
         const riskRates =   [0.16, 0.20, 0.24, 0.29, 0.34, 0.39, 0.44, 0.50];
         const carAssets = ['car_red.svg', 'car_blue.svg', 'truck.svg'];
 
+        let currentRoundId = null;
         let currentBet = 0;
         let currentLane = 0;
         let isGameActive = false;
         let isHopping = false;
+        let isSettling = false;
+        let autoCashoutTimer = null;
         let trafficInterval = null;
 
         const startBtn = document.getElementById('startBtn');
@@ -214,19 +220,18 @@
             }
         }
 
-        // Tráfico de vehículos más dinámico
         function startTraffic() {
             if (trafficInterval) clearInterval(trafficInterval);
             trafficInterval = setInterval(() => {
                 if (!isGameActive) return;
                 const car = document.createElement('div');
                 car.className = 'car-obstacle';
-                const asset = carAssets[Math.floor(Math.random() * carAssets.length)];
+                const asset = carAssets[casino.randomInt(0, carAssets.length - 1)];
                 car.innerHTML = `<img src="../assets/games/chicken/${asset}">`;
                 
-                const randomLane = Math.floor(Math.random() * 8) + 1;
+                const randomLane = casino.randomInt(1, 8);
                 car.style.bottom = `${randomLane * 54 - 40}px`;
-                car.style.animationDuration = `${Math.random() * 1.0 + 1.6}s`; // Más veloces
+                car.style.animationDuration = `${casino.randomFloat() * 1.0 + 1.6}s`;
                 road.appendChild(car);
 
                 setTimeout(() => {
@@ -250,15 +255,21 @@
         }
 
         startBtn.addEventListener('click', () => {
-            if (isGameActive) return;
+            if (isGameActive || isSettling) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            const round = casino.startRound('chickenroad', apuestaInput.value);
+            if (!round) return;
 
-            currentBet = bet;
+            currentRoundId = round.roundId;
+            currentBet = round.betAmount;
             currentLane = 0;
             isGameActive = true;
             isHopping = false;
+            isSettling = false;
+            if (autoCashoutTimer) {
+                clearTimeout(autoCashoutTimer);
+                autoCashoutTimer = null;
+            }
 
             buildLanes();
             const ch = document.getElementById('chickenContainer');
@@ -278,9 +289,8 @@
         });
 
         advanceBtn.addEventListener('click', () => {
-            if (!isGameActive || isHopping || currentLane >= 8) return;
+            if (!isGameActive || isHopping || isSettling || currentLane >= 8) return;
 
-            // Bloquear clics durante el salto
             isHopping = true;
             advanceBtn.disabled = true;
             cashoutBtn.disabled = true;
@@ -290,15 +300,17 @@
             casino.playSound('chip');
 
             setTimeout(() => {
+                if (!isGameActive || isSettling) return;
+
                 const risk = riskRates[currentLane];
-                const hit = Math.random() < risk;
+                const hit = casino.randomFloat() < risk;
 
                 if (hit) {
                     // Atropellada
                     img.src = '../assets/games/mines/mine.svg';
                     img.style.transform = 'rotate(180deg) scale(1.2)';
                     casino.playSound('explosion');
-                    casino.recordLoss(currentBet);
+                    casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
                     casino.showToast('¡Oh no! Un vehículo chocó a la gallina. Apuesta perdida.', 'error');
                     endGame();
                 } else {
@@ -311,25 +323,35 @@
                     isHopping = false;
 
                     if (currentLane >= 8) {
+                        advanceBtn.disabled = true;
+                        cashoutBtn.disabled = true;
                         casino.showToast('🏆 ¡INCREÍBLE! Cruzaste toda la carretera sana y salva.', 'win');
-                        setTimeout(cashOut, 1000);
+                        autoCashoutTimer = setTimeout(() => cashOut(), 900);
                     } else {
                         advanceBtn.disabled = false;
                         cashoutBtn.disabled = false;
                     }
                 }
-            }, 550);
+            }, 500);
         });
 
         cashoutBtn.addEventListener('click', cashOut);
 
         function cashOut() {
-            if (!isGameActive || currentLane === 0) return;
+            if (!isGameActive || isSettling || currentLane === 0) return;
             isGameActive = false;
+            isSettling = true;
+
+            if (autoCashoutTimer) {
+                clearTimeout(autoCashoutTimer);
+                autoCashoutTimer = null;
+            }
+
+            advanceBtn.disabled = true;
+            cashoutBtn.disabled = true;
 
             const mult = multipliers[currentLane - 1];
-            const payout = Math.floor(currentBet * mult);
-            casino.addPayout(payout, mult, { showToast: true });
+            casino.settleRound(currentRoundId, mult, { showToast: true });
 
             endGame();
         }
@@ -337,6 +359,11 @@
         function endGame() {
             isGameActive = false;
             isHopping = false;
+            isSettling = false;
+            if (autoCashoutTimer) {
+                clearTimeout(autoCashoutTimer);
+                autoCashoutTimer = null;
+            }
             if (trafficInterval) clearInterval(trafficInterval);
 
             startBtn.disabled = false;

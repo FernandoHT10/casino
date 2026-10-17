@@ -151,6 +151,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
@@ -232,14 +234,21 @@
             });
         }
 
+        let currentRoundId = null;
+        let currentBet = 0;
+        let cupSelected = false;
+
         startBtn.addEventListener('click', async () => {
-            if (isPlaying) return;
+            if (isPlaying || isShuffling) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            const round = casino.startRound('thimbles', apuestaInput.value);
+            if (!round) return;
 
+            currentRoundId = round.roundId;
+            currentBet = round.betAmount;
             isPlaying = true;
             isShuffling = true;
+            cupSelected = false;
             startBtn.disabled = true;
             apuestaInput.disabled = true;
             document.querySelectorAll('.mode-btn').forEach(b => b.style.pointerEvents = 'none');
@@ -250,8 +259,8 @@
             // 1. Ocultar todas las bolas
             stage.querySelectorAll('.golden-ball-img').forEach(b => b.style.display = 'none');
 
-            // 2. Asignar vaso ganador y mostrar bola
-            winningCupId = Math.floor(Math.random() * totalCups);
+            // 2. Asignar vaso ganador con CSPRNG y mostrar bola
+            winningCupId = casino.randomInt(0, totalCups - 1);
             const winCup = stage.querySelector(`[data-cup-id="${winningCupId}"]`);
             const winBall = document.getElementById(`ball_${winningCupId}`);
 
@@ -262,20 +271,19 @@
 
             await new Promise(r => setTimeout(r, 1300));
 
-            // 3. BAJAR EL VASO Y OCULTAR 100% LA BOLA ANTES DE MEZCLAR (FIX DEL BUG)
+            // 3. Bajar el vaso y ocultar bola antes de mezclar
             winCup.classList.remove('lifted');
             await new Promise(r => setTimeout(r, 400));
-            winBall.style.display = 'none'; // ¡100% INVISIBLE DURANTE EL SHUFFLE!
+            winBall.style.display = 'none';
 
             statusMsg.innerText = '🌪️ ¡Sigue el vaso con la vista!';
 
-            // 4. Barajado Físico Real (Intercambio animado de posiciones)
+            // 4. Barajado Físico Real con CSPRNG
             const numSwaps = totalCups === 2 ? 5 : 7;
             for (let s = 0; s < numSwaps; s++) {
-                // Elegir dos slots distintos
-                let s1 = Math.floor(Math.random() * totalCups);
-                let s2 = Math.floor(Math.random() * totalCups);
-                while (s2 === s1) s2 = Math.floor(Math.random() * totalCups);
+                let s1 = casino.randomInt(0, totalCups - 1);
+                let s2 = casino.randomInt(0, totalCups - 1);
+                while (s2 === s1) s2 = casino.randomInt(0, totalCups - 1);
 
                 await swapSlots(s1, s2);
                 await new Promise(r => setTimeout(r, 60));
@@ -289,7 +297,8 @@
         });
 
         function pickCup(chosenCupId) {
-            if (!isPlaying || isShuffling) return;
+            if (!isPlaying || isShuffling || cupSelected) return;
+            cupSelected = true;
             isPlaying = false;
 
             const cups = stage.querySelectorAll('.cup-item');
@@ -301,22 +310,22 @@
 
             // Levantar vaso elegido
             chosenCupEl.classList.add('lifted');
-            winBall.style.display = 'block'; // Solo se revela ahora al finalizar
+            winBall.style.display = 'block';
 
-            const mult = totalCups === 3 ? 2.90 : 1.95;
-            const bet = parseInt(apuestaInput.value);
+            // RTP exacto del 96.0% (3 vasos: 2.88x | 2 vasos: 1.92x)
+            const mult = totalCups === 3 ? 2.88 : 1.92;
 
             setTimeout(() => {
                 if (chosenCupId === winningCupId) {
                     // Ganó
-                    const payout = Math.floor(bet * mult);
-                    casino.addPayout(payout, mult, { showToast: true });
+                    casino.settleRound(currentRoundId, mult, { showToast: true });
+                    const payout = Math.floor(currentBet * mult);
                     statusMsg.innerText = `🎉 ¡EXCELENTE VISTA! Acertaste el vaso ganador (+${payout.toLocaleString()} créditos).`;
                     statusMsg.style.color = '#2ed573';
                 } else {
-                    // Falló: levantar también el vaso donde realmente estaba
+                    // Falló: levantar también el vaso donde estaba la bola
                     winningCupEl.classList.add('lifted');
-                    casino.recordLoss(bet);
+                    casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
                     statusMsg.innerText = `😔 ¡Fallaste! La bola estaba en el otro cubilete.`;
                     statusMsg.style.color = '#ff4757';
                 }
@@ -324,6 +333,7 @@
                 setTimeout(() => {
                     startBtn.disabled = false;
                     apuestaInput.disabled = false;
+                    cupSelected = false;
                     document.querySelectorAll('.mode-btn').forEach(b => b.style.pointerEvents = 'auto');
                     statusMsg.style.color = 'var(--gold)';
                 }, 2200);

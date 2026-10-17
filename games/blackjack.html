@@ -226,10 +226,13 @@
 
             <!-- Botones de Acción -->
             <div class="game-controls-panel">
-                <button class="casino-btn casino-btn-success" id="hitBtn" disabled style="min-width: 140px;">
+                <button class="casino-btn casino-btn-success" id="hitBtn" disabled style="min-width: 130px;">
                     <i class="fas fa-plus-circle"></i> Pedir Carta
                 </button>
-                <button class="casino-btn casino-btn-danger" id="standBtn" disabled style="min-width: 140px;">
+                <button class="casino-btn casino-btn-warning" id="doubleBtn" disabled style="min-width: 130px; background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff;">
+                    <i class="fas fa-coins"></i> Doblar (x2)
+                </button>
+                <button class="casino-btn casino-btn-danger" id="standBtn" disabled style="min-width: 130px;">
                     <i class="fas fa-hand-paper"></i> Plantarse
                 </button>
             </div>
@@ -237,6 +240,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
@@ -267,36 +272,42 @@
         ];
 
         let state = {
-            deck: [],
+            shoe: [],
             playerCards: [],
             dealerCards: [],
+            currentRoundId: null,
             currentBet: 0,
-            isPlaying: false
+            isPlaying: false,
+            hasDoubled: false,
+            actionLocked: false
         };
 
         const dealBtn = document.getElementById('dealBtn');
         const hitBtn = document.getElementById('hitBtn');
+        const doubleBtn = document.getElementById('doubleBtn');
         const standBtn = document.getElementById('standBtn');
         const apuestaInput = document.getElementById('apuesta');
         const resultBanner = document.getElementById('resultBanner');
 
-        function createDeck() {
-            const deck = [];
-            for (let s of suits) {
-                for (let r of cardRanks) {
-                    deck.push({ rank: r.label, val: r.value, suitName: s.name, isRed: s.isRed });
+        // Zapato de Casino Real: 6 Barajas (312 Cartas) con CSPRNG Fisher-Yates
+        function createShoe() {
+            const shoe = [];
+            for (let d = 0; d < 6; d++) {
+                for (let s of suits) {
+                    for (let r of cardRanks) {
+                        shoe.push({ rank: r.label, val: r.value, suitName: s.name, isRed: s.isRed });
+                    }
                 }
             }
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
-            return deck;
+            return casino.shuffleArray(shoe);
         }
 
         function drawCard() {
-            if (state.deck.length < 10) state.deck = createDeck();
-            return state.deck.pop();
+            // Cut Card: si queda menos del 25% de cartas (78 cartas), re-barajar
+            if (!state.shoe || state.shoe.length < 78) {
+                state.shoe = createShoe();
+            }
+            return state.shoe.pop();
         }
 
         function calculateHand(cards) {
@@ -364,27 +375,38 @@
 
         function resetGameControls() {
             state.isPlaying = false;
+            state.actionLocked = false;
+            state.hasDoubled = false;
             dealBtn.disabled = false;
             apuestaInput.disabled = false;
             hitBtn.disabled = true;
+            doubleBtn.disabled = true;
             standBtn.disabled = true;
             document.querySelectorAll('.casino-chip').forEach(c => c.style.pointerEvents = 'auto');
         }
 
+        // Repartir
         dealBtn.addEventListener('click', () => {
             if (state.isPlaying) return;
 
-            const betAmount = parseInt(apuestaInput.value);
-            if (!casino.deductBet(betAmount)) return;
+            const round = casino.startRound('blackjack', apuestaInput.value);
+            if (!round) return;
 
-            state.currentBet = betAmount;
+            state.currentRoundId = round.roundId;
+            state.currentBet = round.betAmount;
             state.isPlaying = true;
+            state.hasDoubled = false;
+            state.actionLocked = false;
+
             dealBtn.disabled = true;
             apuestaInput.disabled = true;
             resultBanner.style.display = 'none';
             document.querySelectorAll('.casino-chip').forEach(c => c.style.pointerEvents = 'none');
 
-            state.deck = createDeck();
+            if (!state.shoe || state.shoe.length < 78) {
+                state.shoe = createShoe();
+            }
+
             state.playerCards = [drawCard(), drawCard()];
             state.dealerCards = [drawCard(), drawCard()];
 
@@ -394,25 +416,34 @@
             const pSum = calculateHand(state.playerCards);
             const dSum = calculateHand(state.dealerCards);
 
+            // Blackjack Natural inicial (2 cartas)
             if (pSum === 21) {
                 updateHandUI(false);
                 if (dSum === 21) {
-                    casino.addPayout(state.currentBet, 1, { showToast: true });
-                    showResult('Empate de Blackjack. Se devuelve tu apuesta.', 'push');
+                    casino.settleRound(state.currentRoundId, 1.0, { showToast: true });
+                    showResult('Empate de Blackjack natural. Se devuelve tu apuesta.', 'push');
                 } else {
-                    const payout = Math.floor(state.currentBet * 2.5);
-                    casino.addPayout(payout, 2.5, { showToast: true });
-                    showResult(`¡BLACKJACK NATURAL! Ganaste ${payout.toLocaleString()} créditos (3:2)`, 'win');
+                    // Pago 3:2 = 2.5x total
+                    casino.settleRound(state.currentRoundId, 2.5, { showToast: true });
+                    showResult(`¡BLACKJACK NATURAL! Ganaste (pago 3:2)`, 'win');
                 }
                 resetGameControls();
             } else {
                 hitBtn.disabled = false;
                 standBtn.disabled = false;
+                // Opción de Doblar solo con 2 cartas y saldo suficiente
+                casino.syncFromStorage();
+                if (casino.getSaldo() >= state.currentBet) {
+                    doubleBtn.disabled = false;
+                }
             }
         });
 
+        // Pedir Carta
         hitBtn.addEventListener('click', () => {
-            if (!state.isPlaying) return;
+            if (!state.isPlaying || state.actionLocked) return;
+            doubleBtn.disabled = true;
+
             state.playerCards.push(drawCard());
             casino.playSound('card');
             updateHandUI(true);
@@ -420,7 +451,7 @@
             const pSum = calculateHand(state.playerCards);
             if (pSum > 21) {
                 updateHandUI(false);
-                casino.recordLoss(state.currentBet);
+                casino.settleRound(state.currentRoundId, 0, { recordLoss: true, showToast: false });
                 showResult(`Te pasaste con ${pSum}. Mano perdida.`, 'lose');
                 resetGameControls();
             } else if (pSum === 21) {
@@ -428,11 +459,48 @@
             }
         });
 
+        // Doblar Apuesta (Double Down: exactamente 1 carta y plantarse)
+        doubleBtn.addEventListener('click', () => {
+            if (!state.isPlaying || state.actionLocked || state.hasDoubled || state.playerCards.length !== 2) return;
+
+            state.hasDoubled = true;
+            state.actionLocked = true;
+            hitBtn.disabled = true;
+            doubleBtn.disabled = true;
+            standBtn.disabled = true;
+
+            const success = casino.addExtraBet(state.currentRoundId, state.currentBet);
+            if (!success) {
+                state.actionLocked = false;
+                hitBtn.disabled = false;
+                standBtn.disabled = false;
+                return;
+            }
+
+            state.currentBet *= 2;
+            state.playerCards.push(drawCard());
+            casino.playSound('card');
+            updateHandUI(true);
+
+            const pSum = calculateHand(state.playerCards);
+            if (pSum > 21) {
+                updateHandUI(false);
+                casino.settleRound(state.currentRoundId, 0, { recordLoss: true, showToast: false });
+                showResult(`Te pasaste al doblar con ${pSum}. Mano perdida.`, 'lose');
+                resetGameControls();
+            } else {
+                setTimeout(standHand, 400);
+            }
+        });
+
+        // Plantarse
         standBtn.addEventListener('click', standHand);
 
         function standHand() {
-            if (!state.isPlaying) return;
+            if (!state.isPlaying || state.actionLocked && !state.hasDoubled) return;
+            state.actionLocked = true;
             hitBtn.disabled = true;
+            doubleBtn.disabled = true;
             standBtn.disabled = true;
 
             updateHandUI(false);
@@ -459,23 +527,27 @@
             const dSum = calculateHand(state.dealerCards);
 
             if (dSum > 21) {
-                const payout = state.currentBet * 2;
-                casino.addPayout(payout, 2);
-                showResult(`¡El crupier se pasó (${dSum})! Ganaste ${payout.toLocaleString()} créditos`, 'win');
+                // Crupier se pasa (pago 1:1 -> multiplicador 2.0x)
+                casino.settleRound(state.currentRoundId, 2.0, { showToast: true });
+                showResult(`¡El crupier se pasó con ${dSum}! Ganaste créditos (2:1)`, 'win');
             } else if (pSum > dSum) {
-                const payout = state.currentBet * 2;
-                casino.addPayout(payout, 2);
-                showResult(`¡Ganaste con ${pSum} contra ${dSum} del crupier! (+${payout.toLocaleString()})`, 'win');
+                // Jugador gana
+                casino.settleRound(state.currentRoundId, 2.0, { showToast: true });
+                showResult(`¡Ganaste con ${pSum} contra ${dSum} del crupier! (2:1)`, 'win');
             } else if (pSum === dSum) {
-                casino.addPayout(state.currentBet, 1);
+                // Empate
+                casino.settleRound(state.currentRoundId, 1.0, { showToast: true });
                 showResult(`Empate a ${pSum}. Apuesta recuperada.`, 'push');
             } else {
-                casino.recordLoss(state.currentBet);
+                // Crupier gana
+                casino.settleRound(state.currentRoundId, 0, { recordLoss: true, showToast: false });
                 showResult(`Crupier gana con ${dSum} contra tus ${pSum}.`, 'lose');
             }
 
             resetGameControls();
         }
+
+        state.shoe = createShoe();
     </script>
 </body>
 </html>

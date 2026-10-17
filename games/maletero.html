@@ -149,17 +149,22 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
         casino.renderHeader('gameHeaderNav', { title: 'Maletero Secreto', backUrl: '../index.html' });
         casino.setupChips('#chipSelector', '#apuesta');
 
-        // Dificultad Real (60% riesgo de maletín vacío, 40% premios altos)
-        const baseMultipliers = [0, 0, 0, 0, 0, 0, 1.2, 1.8, 2.6, 5.0];
+        // Matriz calibrada a RTP exacto del 96.0% (House Edge 4%)
+        // Suma: 0*6 + 1.10 + 1.60 + 2.40 + 4.50 = 9.60 / 10 = 0.96
+        const baseMultipliers = [0, 0, 0, 0, 0, 0, 1.10, 1.60, 2.40, 4.50];
         let currentMultipliers = [];
+        let currentRoundId = null;
         let currentBet = 0;
         let isGameActive = false;
+        let briefcaseOpened = false;
 
         const startBtn = document.getElementById('startBtn');
         const apuestaInput = document.getElementById('apuesta');
@@ -184,37 +189,33 @@
             }
         }
 
-        function shuffle(arr) {
-            const a = [...arr];
-            for (let i = a.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [a[i], a[j]] = [a[j], a[i]];
-            }
-            return a;
-        }
-
         startBtn.addEventListener('click', () => {
-            if (isGameActive) return;
+            if (isGameActive || briefcaseOpened) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            const round = casino.startRound('maletero', apuestaInput.value);
+            if (!round) return;
 
-            currentBet = bet;
+            currentRoundId = round.roundId;
+            currentBet = round.betAmount;
             isGameActive = true;
+            briefcaseOpened = false;
             startBtn.disabled = true;
             apuestaInput.disabled = true;
-            currentMultipliers = shuffle(baseMultipliers);
+
+            // Barajado Fisher-Yates con CSPRNG
+            currentMultipliers = casino.shuffleArray(baseMultipliers);
 
             renderInitialBoard();
             const cards = document.querySelectorAll('.case-card');
             cards.forEach(c => c.classList.remove('disabled'));
 
-            statusMsg.innerText = '✨ 6 maletines vacíos y 4 con grandes premios. ¡Elige con cuidado!';
+            statusMsg.innerText = '✨ 6 maletines vacíos y 4 con premios. ¡Elige con cuidado!';
             casino.playSound('click');
         });
 
         function openBriefcase(index, cardEl) {
-            if (!isGameActive) return;
+            if (!isGameActive || briefcaseOpened) return;
+            briefcaseOpened = true;
             isGameActive = false;
 
             const cards = document.querySelectorAll('.case-card');
@@ -226,7 +227,7 @@
             if (mult > 0) {
                 backFace.innerHTML = `
                     <img src="../assets/games/maletero/briefcase_cash.svg">
-                    <div>x${mult.toFixed(1)}</div>
+                    <div>x${mult.toFixed(2)}</div>
                 `;
                 backFace.className = 'case-face case-back win';
             } else {
@@ -239,42 +240,43 @@
 
             cardEl.classList.add('opened');
 
-            const payout = Math.floor(currentBet * mult);
-            setTimeout(() => {
-                if (payout > 0) {
-                    casino.addPayout(payout, mult, { showToast: true });
-                    statusMsg.innerText = `🎉 ¡PREMIO! El maletín #${index + 1} contenía x${mult.toFixed(1)} (+${payout.toLocaleString()} créditos).`;
-                    statusMsg.style.color = '#2ed573';
-                } else {
-                    casino.recordLoss(currentBet);
-                    statusMsg.innerText = `😔 El maletín #${index + 1} estaba vacío. Suerte para la próxima.`;
-                    statusMsg.style.color = '#ff4757';
+            // Liquidación atómica por ronda
+            if (mult > 0) {
+                casino.settleRound(currentRoundId, mult, { showToast: true });
+                const payout = Math.floor(currentBet * mult);
+                statusMsg.innerText = `🎉 ¡PREMIO! El maletín #${index + 1} contenía x${mult.toFixed(2)} (+${payout.toLocaleString()} créditos).`;
+                statusMsg.style.color = '#2ed573';
+            } else {
+                casino.settleRound(currentRoundId, 0, { recordLoss: true, showToast: false });
+                statusMsg.innerText = `😔 El maletín #${index + 1} estaba vacío. Suerte para la próxima.`;
+                statusMsg.style.color = '#ff4757';
+            }
+
+            // Revelar el resto de maletines
+            cards.forEach((c, idx) => {
+                if (idx !== index) {
+                    setTimeout(() => {
+                        const m = currentMultipliers[idx];
+                        const bf = c.querySelector('.case-back');
+                        if (m > 0) {
+                            bf.innerHTML = `<img src="../assets/games/maletero/briefcase_cash.svg" style="width: 35px; height: 35px;"><div>x${m.toFixed(2)}</div>`;
+                            bf.className = 'case-face case-back win';
+                        } else {
+                            bf.innerHTML = `<div style="font-size: 20px; color: #ff4757;">❌</div><div>0x</div>`;
+                            bf.className = 'case-face case-back empty';
+                        }
+                        c.classList.add('opened');
+                        c.style.opacity = '0.5';
+                    }, (idx + 1) * 80);
                 }
+            });
 
-                cards.forEach((c, idx) => {
-                    if (idx !== index) {
-                        setTimeout(() => {
-                            const m = currentMultipliers[idx];
-                            const bf = c.querySelector('.case-back');
-                            if (m > 0) {
-                                bf.innerHTML = `<img src="../assets/games/maletero/briefcase_cash.svg" style="width: 35px; height: 35px;"><div>x${m.toFixed(1)}</div>`;
-                                bf.className = 'case-face case-back win';
-                            } else {
-                                bf.innerHTML = `<div style="font-size: 20px; color: #ff4757;">❌</div><div>0x</div>`;
-                                bf.className = 'case-face case-back empty';
-                            }
-                            c.classList.add('opened');
-                            c.style.opacity = '0.5';
-                        }, (idx + 1) * 90);
-                    }
-                });
-
-                setTimeout(() => {
-                    startBtn.disabled = false;
-                    apuestaInput.disabled = false;
-                    statusMsg.style.color = 'var(--gold)';
-                }, 2200);
-            }, 500);
+            setTimeout(() => {
+                startBtn.disabled = false;
+                apuestaInput.disabled = false;
+                briefcaseOpened = false;
+                statusMsg.style.color = 'var(--gold)';
+            }, 2000);
         }
 
         renderInitialBoard();

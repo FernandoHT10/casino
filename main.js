@@ -1,13 +1,19 @@
 /**
- * Casino AC - Main Lobby Controller
+ * Casino AC - Main Lobby Controller (v4.0 - Supabase Cloud Auth)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+const AVATAR_CATALOG = Object.freeze({
+    'crown': { price: 5000, name: 'Corona Rey', icon: '👑' },
+    'diamond': { price: 5000, name: 'Diamante', icon: '💎' }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
     initParticles();
-    checkSession();
+    await checkSession();
     setupAuthListeners();
     setupShopListeners();
     setupNotificationListeners();
+    checkSupabaseSetupNotice();
 });
 
 // Canvas de Partículas Flotantes
@@ -60,13 +66,33 @@ function initParticles() {
     animate();
 }
 
-// Comprobar Sesión
-function checkSession() {
-    const user = casino.getCurrentUser();
+// Comprobar si Supabase requiere configuración
+function checkSupabaseSetupNotice() {
+    const cfg = window.CASINO_SUPABASE_CONFIG;
+    const isPlaceholder = !cfg || !cfg.url || cfg.url.includes('TU_PROYECTO');
+    const authHeader = document.querySelector('.auth-header p');
+
+    if (isPlaceholder && authHeader) {
+        authHeader.innerHTML = `
+            Inicia sesión o regístrate en la nube.<br>
+            <span style="display: inline-block; margin-top: 8px; font-size: 11px; color: var(--gold); background: rgba(255,215,0,0.1); border: 1px dashed var(--gold); padding: 4px 10px; border-radius: 6px;">
+                <i class="fas fa-cloud"></i> Base de datos Supabase: pega tu URL y Anon Key en <code>shared/supabase-config.js</code>
+            </span>
+        `;
+    }
+}
+
+// Comprobar Sesión de Usuario
+async function checkSession() {
     const loginSection = document.getElementById('authSection');
     const menuSection = document.getElementById('menuSection');
 
-    if (user && casino.currentUser) {
+    let user = casino.getCurrentUser();
+    if (!user && casino.supabase) {
+        user = await casino.fetchUserProfile();
+    }
+
+    if (user) {
         if (loginSection) loginSection.style.display = 'none';
         if (menuSection) menuSection.style.display = 'block';
         updateUserUI();
@@ -88,15 +114,19 @@ function updateUserUI() {
     const coinsEl = document.getElementById('userCoins');
     const avatarEl = document.getElementById('userAvatarIcon');
 
-    if (usernameEl) usernameEl.innerText = casino.currentUser;
-    if (saldoEl) saldoEl.innerText = Math.floor(user.saldo).toLocaleString();
+    if (usernameEl) usernameEl.innerText = user.username || 'Jugador';
+    if (saldoEl) saldoEl.innerText = Math.max(0, Math.floor(user.saldo)).toLocaleString();
     if (levelEl) levelEl.innerText = user.level || 1;
     if (xpEl) xpEl.innerText = user.xp || 0;
     if (coinsEl) coinsEl.innerText = user.coins || 0;
-    if (avatarEl) avatarEl.innerText = user.avatar || '👤';
+    if (avatarEl) {
+        if (user.avatar === 'crown') avatarEl.innerText = '👑';
+        else if (user.avatar === 'diamond') avatarEl.innerText = '💎';
+        else avatarEl.innerText = user.avatar || '👤';
+    }
 }
 
-// Autenticación (Login / Registro / Logout)
+// Autenticación con Supabase Cloud
 function setupAuthListeners() {
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
@@ -109,8 +139,9 @@ function setupAuthListeners() {
         authMsg.style.color = type === 'success' ? '#2ed573' : '#ff4757';
     }
 
+    // Iniciar Sesión Online
     if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
+        loginBtn.addEventListener('click', async () => {
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
 
@@ -120,23 +151,26 @@ function setupAuthListeners() {
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users')) || {};
-            if (users[u] && users[u].password === p) {
-                casino.currentUser = u;
-                localStorage.setItem('currentUser', u);
-                casino.initUsers();
+            loginBtn.disabled = true;
+            setAuthMsg('Conectando a Supabase Cloud...', 'success');
+
+            const res = await casino.loginWithSupabase(u, p);
+            loginBtn.disabled = false;
+
+            if (res.success) {
                 casino.playSound('win');
                 setAuthMsg('¡Bienvenido de vuelta! 🎉', 'success');
-                setTimeout(() => checkSession(), 600);
+                setTimeout(() => checkSession(), 400);
             } else {
-                setAuthMsg('Usuario o contraseña incorrectos.');
+                setAuthMsg(res.error || 'Credenciales incorrectas.');
                 casino.playSound('lose');
             }
         });
     }
 
+    // Registrar Usuario Online
     if (registerBtn) {
-        registerBtn.addEventListener('click', () => {
+        registerBtn.addEventListener('click', async () => {
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
 
@@ -152,50 +186,48 @@ function setupAuthListeners() {
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('users')) || {};
-            if (users[u]) {
-                setAuthMsg('Ese nombre de usuario ya existe.');
+            if (p.length < 6) {
+                setAuthMsg('La contraseña debe tener al menos 6 caracteres.');
                 casino.playSound('lose');
                 return;
             }
 
-            // Nuevo Usuario con bono de bienvenida
-            users[u] = {
-                password: p,
-                saldo: 10000,
-                level: 1,
-                xp: 0,
-                coins: 100,
-                avatar: '👤',
-                lastBonus: null,
-                joined: new Date().toISOString()
-            };
+            registerBtn.disabled = true;
+            setAuthMsg('Creando cuenta segura en la nube...', 'success');
 
-            localStorage.setItem('users', JSON.stringify(users));
-            casino.currentUser = u;
-            localStorage.setItem('currentUser', u);
-            casino.initUsers();
-            casino.playSound('jackpot');
-            setAuthMsg('¡Cuenta creada con éxito! +10,000 créditos de bono.', 'success');
-            setTimeout(() => checkSession(), 800);
+            const res = await casino.registerWithSupabase(u, p);
+            registerBtn.disabled = false;
+
+            if (res.success) {
+                casino.playSound('jackpot');
+                setAuthMsg('¡Cuenta creada con éxito! +10,000 créditos en la nube.', 'success');
+                setTimeout(() => checkSession(), 400);
+            } else {
+                setAuthMsg(res.error || 'Error al registrar usuario.');
+                casino.playSound('lose');
+            }
         });
     }
 
+    // Cerrar Sesión
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            casino.currentUser = null;
-            localStorage.removeItem('currentUser');
+        logoutBtn.addEventListener('click', async () => {
+            await casino.logoutSupabase();
             casino.playSound('click');
             checkSession();
         });
     }
 }
 
-// Tienda Funcional
+// Tienda y Recompensas conectadas a la Nube
 function setupShopListeners() {
     const shopBtn = document.getElementById('shopBtn');
     const shopModal = document.getElementById('shopModal');
     const closeShop = document.getElementById('closeShopBtn');
+
+    let isProcessingClaim = false;
+    let isProcessingExchange = false;
+    let isProcessingAvatar = false;
 
     if (shopBtn && shopModal) {
         shopBtn.addEventListener('click', () => {
@@ -211,76 +243,79 @@ function setupShopListeners() {
         });
     }
 
-    // Bono Diario
+    // Reclamar Bono Diario
     const dailyBonusBtn = document.getElementById('claimDailyBonusBtn');
     if (dailyBonusBtn) {
-        dailyBonusBtn.addEventListener('click', () => {
-            const user = casino.getCurrentUser();
-            if (!user) return;
+        dailyBonusBtn.addEventListener('click', async () => {
+            if (isProcessingClaim) return;
+            isProcessingClaim = true;
+            dailyBonusBtn.disabled = true;
 
-            const now = Date.now();
-            const last = user.lastBonus || 0;
-            const cooldown = 24 * 60 * 60 * 1000; // 24 horas
-
-            if (now - last < cooldown) {
-                const hoursLeft = Math.ceil((cooldown - (now - last)) / (1000 * 60 * 60));
-                casino.showToast(`Bono diario ya reclamado. Vuelve en ${hoursLeft}h.`, 'error');
+            const res = await casino.claimDailyBonus();
+            if (res.success) {
+                updateUserUI();
+                casino.playSound('jackpot');
+                casino.showToast('¡Has reclamado tu bono diario de 2,000 créditos! 🎁', 'win');
+            } else {
+                casino.showToast(res.error || 'No se pudo reclamar el bono.', 'error');
                 casino.playSound('lose');
-                return;
             }
 
-            user.saldo += 2000;
-            user.lastBonus = now;
-            casino.saveUsers();
-            updateUserUI();
-            casino.playSound('jackpot');
-            casino.showToast('¡Has reclamado tu bono diario de 2,000 créditos! 🎁', 'win');
+            setTimeout(() => {
+                isProcessingClaim = false;
+                dailyBonusBtn.disabled = false;
+            }, 600);
         });
     }
 
-    // Canje de Monedas
+    // Canje de Monedas VIP
     const exchangeCoinsBtn = document.getElementById('exchangeCoinsBtn');
     if (exchangeCoinsBtn) {
-        exchangeCoinsBtn.addEventListener('click', () => {
-            const user = casino.getCurrentUser();
-            if (!user) return;
+        exchangeCoinsBtn.addEventListener('click', async () => {
+            if (isProcessingExchange) return;
+            isProcessingExchange = true;
+            exchangeCoinsBtn.disabled = true;
 
-            if ((user.coins || 0) < 50) {
-                casino.showToast('Necesitas al menos 50 fichas para canjear.', 'error');
+            const res = await casino.exchangeCoins();
+            if (res.success) {
+                updateUserUI();
+                casino.playSound('win');
+                casino.showToast('¡Canjeaste 50 fichas VIP por 1,000 créditos!', 'win');
+            } else {
+                casino.showToast(res.error || 'Error al canjear fichas.', 'error');
                 casino.playSound('lose');
-                return;
             }
 
-            user.coins -= 50;
-            user.saldo += 1000;
-            casino.saveUsers();
-            updateUserUI();
-            casino.playSound('win');
-            casino.showToast('¡Canjeaste 50 fichas por 1,000 créditos!', 'win');
+            setTimeout(() => {
+                isProcessingExchange = false;
+                exchangeCoinsBtn.disabled = false;
+            }, 500);
         });
     }
 
-    // Compra de Avatares
+    // Compra de Avatares VIP
     document.querySelectorAll('.buy-avatar-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const user = casino.getCurrentUser();
-            if (!user) return;
+        btn.addEventListener('click', async () => {
+            if (isProcessingAvatar) return;
+            isProcessingAvatar = true;
+            btn.disabled = true;
 
-            const price = parseInt(btn.dataset.price);
-            const avatar = btn.dataset.avatar;
+            const avatarKey = btn.dataset.avatar;
+            const res = await casino.buyAvatar(avatarKey, AVATAR_CATALOG);
 
-            if (user.saldo < price) {
-                casino.showToast('Saldo insuficiente para comprar este avatar.', 'error');
+            if (res.success) {
+                updateUserUI();
+                casino.playSound('win');
+                casino.showToast(`¡Compraste el avatar ${res.name || ''}!`, 'win');
+            } else {
+                casino.showToast(res.error || 'Error al comprar avatar.', 'error');
                 casino.playSound('lose');
-                return;
             }
 
-            user.saldo -= price;
-            user.avatar = avatar;
-            casino.saveUsers();
-            updateUserUI();
-            casino.playSound('win');
-            casino.showToast(`¡Nuevo avatar equipado: ${avatar}!`, 'win');
+            setTimeout(() => {
+                isProcessingAvatar = false;
+                btn.disabled = false;
+            }, 500);
         });
     });
 }

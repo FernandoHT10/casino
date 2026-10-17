@@ -210,6 +210,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/supabase-config.js"></script>
     <script src="../shared/casino-engine.js"></script>
     <script>
         casino.requireAuth();
@@ -226,6 +228,26 @@
             'cherry': 5
         };
 
+        // PAR Sheet de Casino Real: Rodillos Virtuales Ponderados (RTP ~95.5%)
+        const SYMBOL_WEIGHTS = [
+            { sym: 'seven', weight: 4 },     // Jackpot de baja frecuencia
+            { sym: 'moneybag', weight: 8 },
+            { sym: 'diamond', weight: 14 },
+            { sym: 'bell', weight: 20 },
+            { sym: 'lemon', weight: 26 },
+            { sym: 'cherry', weight: 28 }
+        ];
+
+        function pickWeightedSymbol() {
+            const totalWeight = SYMBOL_WEIGHTS.reduce((acc, s) => acc + s.weight, 0);
+            let rnd = casino.randomInt(1, totalWeight);
+            for (let item of SYMBOL_WEIGHTS) {
+                if (rnd <= item.weight) return item.sym;
+                rnd -= item.weight;
+            }
+            return 'cherry';
+        }
+
         const reels = [
             document.getElementById('reel1'),
             document.getElementById('reel2'),
@@ -236,6 +258,7 @@
         const jackpotText = document.getElementById('jackpotText');
 
         let isSpinning = false;
+        let activeRound = null;
 
         function setReelSymbol(reelEl, symKey) {
             reelEl.innerHTML = `<img src="../assets/games/slots/${symKey}.svg" class="symbol-icon">`;
@@ -244,8 +267,9 @@
         spinBtn.addEventListener('click', () => {
             if (isSpinning) return;
 
-            const bet = parseInt(apuestaInput.value);
-            if (!casino.deductBet(bet)) return;
+            // Iniciar transacción de ronda atómica
+            activeRound = casino.startRound('slot777', apuestaInput.value);
+            if (!activeRound) return;
 
             isSpinning = true;
             spinBtn.disabled = true;
@@ -258,34 +282,34 @@
                 r.classList.add('spinning');
             });
 
-            // Selección de resultado
+            // Selección determinista de resultado mediante CSPRNG ponderado
             const finalSymbols = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
+                pickWeightedSymbol(),
+                pickWeightedSymbol(),
+                pickWeightedSymbol()
             ];
 
-            // Intervalo visual
+            // Animación visual de giro
             const spinInterval = setInterval(() => {
                 reels.forEach(r => {
-                    const randSym = symbols[Math.floor(Math.random() * symbols.length)];
+                    const randSym = symbols[casino.randomInt(0, symbols.length - 1)];
                     setReelSymbol(r, randSym);
                 });
                 casino.playSound('chip');
             }, 80);
 
-            // Parada Progresiva (Staggered Stops)
+            // Parada progresiva (Staggered Stops)
             setTimeout(() => {
                 reels[0].classList.remove('spinning');
                 setReelSymbol(reels[0], finalSymbols[0]);
                 casino.playSound('card');
-            }, 1100);
+            }, 1000);
 
             setTimeout(() => {
                 reels[1].classList.remove('spinning');
                 setReelSymbol(reels[1], finalSymbols[1]);
                 casino.playSound('card');
-            }, 1600);
+            }, 1500);
 
             setTimeout(() => {
                 clearInterval(spinInterval);
@@ -293,42 +317,43 @@
                 setReelSymbol(reels[2], finalSymbols[2]);
                 casino.playSound('card');
 
-                evaluateOutcome(bet, finalSymbols);
-            }, 2100);
+                evaluateOutcome(activeRound, finalSymbols);
+            }, 2000);
         });
 
-        // Evaluación con Dificultad Real (Sin premios regalados)
-        function evaluateOutcome(bet, results) {
+        // Evaluación de premio y liquidación atómica única
+        function evaluateOutcome(round, results) {
             isSpinning = false;
             spinBtn.disabled = false;
             apuestaInput.disabled = false;
 
             const [s1, s2, s3] = results;
+            let mult = 0;
 
             // 3 Iguales: Premio Grande
             if (s1 === s2 && s2 === s3) {
-                const mult = payouts[s1];
-                const payout = bet * mult;
+                mult = payouts[s1];
                 reels.forEach(r => r.classList.add('win-flash'));
-                casino.addPayout(payout, mult, { showToast: true });
+                casino.settleRound(round.roundId, mult, { showToast: true });
+                const payout = Math.floor(round.betAmount * mult);
                 jackpotText.innerText = `👑 ¡JACKPOT! 3x ${s1.toUpperCase()} (+${payout.toLocaleString()} créditos)`;
                 jackpotText.style.color = '#ffd700';
             } 
-            // Consuelo: 2 Cerezas solamente
+            // Consuelo: 2 Cerezas
             else if (
                 (s1 === 'cherry' && s2 === 'cherry') ||
                 (s2 === 'cherry' && s3 === 'cherry') ||
                 (s1 === 'cherry' && s3 === 'cherry')
             ) {
-                const mult = 0.5;
-                const payout = Math.floor(bet * mult);
-                casino.addPayout(payout, mult, { showToast: true });
+                mult = 0.5;
+                casino.settleRound(round.roundId, mult, { showToast: true });
+                const payout = Math.floor(round.betAmount * mult);
                 jackpotText.innerText = `🍒 Dos cerezas: recuperas ${payout.toLocaleString()} créditos.`;
                 jackpotText.style.color = '#2ed573';
             } 
-            // Derrota
+            // Sin combinación
             else {
-                casino.recordLoss(bet);
+                casino.settleRound(round.roundId, 0, { recordLoss: true, showToast: false });
                 jackpotText.innerText = '😔 Sin combinación. ¡Prueba de nuevo!';
                 jackpotText.style.color = '#ff4757';
             }
